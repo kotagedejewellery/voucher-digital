@@ -61,7 +61,7 @@ jobs:
 
               docker compose --env-file .env.production -f compose.production.yml build
               docker compose --env-file .env.production -f compose.production.yml up -d postgres
-              docker compose --env-file .env.production -f compose.production.yml run --rm app php artisan migrate --force
+              docker compose --env-file .env.production -f compose.production.yml run --rm app php artisan migrate --seed --force
               docker compose --env-file .env.production -f compose.production.yml up -d --wait --wait-timeout 90 app worker scheduler
               docker compose --env-file .env.production -f compose.production.yml ps
           REMOTE

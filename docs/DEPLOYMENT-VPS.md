@@ -22,7 +22,7 @@ Jika nama network, entrypoint, atau certificate resolver Traefik berbeda, sesuai
    openssl rand -hex 32
    ```
 
-   Nilai pertama dipakai sebagai `base64:<hasil-pertama>` untuk `APP_KEY`; nilai kedua untuk `DB_PASSWORD`. Simpan keduanya di password manager. Jangan mengubah `APP_KEY` setelah sistem memiliki data.
+   Nilai pertama dipakai sebagai `base64:<hasil-pertama>` untuk `APP_KEY`; nilai kedua untuk `DB_PASSWORD`. `APP_KEY` harus berupa tepat satu baris dengan prefix `base64:` dan hasil base64 32-byte tersebut. Simpan keduanya di password manager. Jangan mengubah `APP_KEY` setelah sistem memiliki data.
 
 4. Tentukan network CIDR atau IP Traefik dan isi `TRUSTED_PROXIES`. Periksa dengan:
 
@@ -83,7 +83,7 @@ Command membaca nama database dan user dari environment container PostgreSQL, se
 
 ## Deploy otomatis GitHub Actions
 
-Workflow [`.github/workflows/deploy-vps.yml`](../.github/workflows/deploy-vps.yml) berjalan saat ada push ke `main` atau ketika dijalankan manual dari tab Actions. Ia masuk sebagai user VPS yang sudah ada, memperbarui checkout pada `/opt/apps/sistem-voucher-digital/voucher-digital` dengan `git pull --ff-only`, build image, menjalankan migrasi, lalu menunggu `app`, `worker`, dan `scheduler` siap.
+Workflow [`.github/workflows/deploy-vps.yml`](../.github/workflows/deploy-vps.yml) berjalan saat ada push ke `main` atau ketika dijalankan manual dari tab Actions. Ia masuk sebagai user VPS yang sudah ada, memperbarui checkout pada `/opt/apps/sistem-voucher-digital/voucher-digital` dengan `git pull --ff-only`, build image, menjalankan migrasi dan seed idempoten, lalu menunggu `app`, `worker`, dan `scheduler` siap.
 
 Tambahkan satu secret repository tambahan sebelum workflow pertama dijalankan:
 
@@ -103,4 +103,4 @@ cp .env.production.example .env.production
 nano .env.production
 ```
 
-Lakukan deploy pertama secara manual sesuai bagian sebelumnya untuk menjalankan `migrate --seed --force` dan membuat admin. Workflow pembaruan hanya menjalankan `migrate --force`; ia tidak mengubah `.env.production`, tidak menjalankan seed, dan gagal aman bila checkout VPS memiliki perubahan Git yang belum tersimpan.
+Lakukan deploy pertama secara manual sesuai bagian sebelumnya untuk membuat admin. Workflow menjalankan `migrate --seed --force`; seeder saat ini hanya membuat policy default bila belum ada dan tidak mengubah policy yang sudah tersimpan. Ia tidak mengubah `.env.production` dan gagal aman bila checkout VPS memiliki perubahan Git yang belum tersimpan.
