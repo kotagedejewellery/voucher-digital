@@ -48,12 +48,16 @@ jobs:
               set -euo pipefail
 
               cd /opt/apps/sistem-voucher-digital/voucher-digital
-              test -f .env.production
               test -z "$(git status --porcelain --untracked-files=all)"
 
               git fetch --prune origin main
               git checkout main
               git pull --ff-only origin main
+
+              if ! test -f .env.production; then
+                echo 'Deployment awal belum siap: buat .env.production dari .env.production.example di VPS.' >&2
+                exit 1
+              fi
 
               docker compose --env-file .env.production -f compose.production.yml build
               docker compose --env-file .env.production -f compose.production.yml up -d postgres

@@ -96,4 +96,11 @@ Tambahkan satu secret repository tambahan sebelum workflow pertama dijalankan:
 
 `VPS_SSH_KNOWN_HOSTS` wajib agar runner memeriksa identitas VPS secara ketat dan tidak menerima host key baru secara otomatis. Ambil host key `ed25519` dari VPS melalui channel tepercaya, lalu bandingkan fingerprint-nya sebelum menyimpan sebagai secret.
 
-Sebelum push pertama yang memicu deploy otomatis, lakukan deploy pertama secara manual sesuai bagian sebelumnya: buat `.env.production`, jalankan `migrate --seed --force`, dan buat admin. Workflow pembaruan hanya menjalankan `migrate --force`; ia tidak mengubah `.env.production`, tidak menjalankan seed, dan gagal aman bila checkout VPS memiliki perubahan Git yang belum tersimpan.
+Pada run pertama, workflow lebih dahulu menarik template konfigurasi dari `main`, lalu akan berhenti dengan pesan jelas sampai `.env.production` dibuat. Setelah file template tersedia di VPS, salin dan isi nilainya:
+
+```sh
+cp .env.production.example .env.production
+nano .env.production
+```
+
+Lakukan deploy pertama secara manual sesuai bagian sebelumnya untuk menjalankan `migrate --seed --force` dan membuat admin. Workflow pembaruan hanya menjalankan `migrate --force`; ia tidak mengubah `.env.production`, tidak menjalankan seed, dan gagal aman bila checkout VPS memiliki perubahan Git yang belum tersimpan.
