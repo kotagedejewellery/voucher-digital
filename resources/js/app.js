@@ -2,13 +2,17 @@ const confirmation = document.getElementById('confirm-action');
 let pendingConfirmation = null;
 const busyButtons = new Map();
 let feedbackTimer;
-const toast = message => {
+const toast = (message, type = 'success', persistent = false) => {
     const box = document.getElementById('feedback');
     if (!box) return;
     clearTimeout(feedbackTimer);
     box.hidden = false;
+    box.classList.remove('success', 'info', 'warning', 'error');
+    box.classList.add(type);
+    box.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    box.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
     box.querySelector('[data-feedback-text]').textContent = message;
-    feedbackTimer = setTimeout(() => { if (!box.matches(':focus-within')) box.hidden = true; }, 6000);
+    if (!persistent) feedbackTimer = setTimeout(() => { if (!box.matches(':focus-within')) box.hidden = true; }, 6000);
 };
 const reveal = field => {
     for (let parent = field.parentElement; parent; parent = parent.parentElement) {
@@ -95,29 +99,33 @@ document.addEventListener('submit', event => {
     form.querySelectorAll('[name="phone"]').forEach(phoneValidity);
     if (!form.reportValidity()) { event.preventDefault(); return; }
     if (!navigator.onLine) {
-        event.preventDefault(); toast('Koneksi terputus. Periksa status transaksi sebelum mengirim ulang.'); return;
+        event.preventDefault(); toast('Koneksi terputus. Periksa status transaksi sebelum mengirim ulang.', 'warning', true); return;
     }
-    if (form.dataset.confirmTitle && !form.dataset.confirmed) {
+    const confirmingInactiveBranch = form.dataset.confirmInactiveTitle && form.dataset.wasActive === '1' && !form.querySelector('[name="active"]')?.checked;
+    const confirmTitle = confirmingInactiveBranch ? form.dataset.confirmInactiveTitle : form.dataset.confirmTitle;
+    const confirmMessage = confirmingInactiveBranch ? form.dataset.confirmInactiveMessage : form.dataset.confirmMessage;
+    const confirmButton = confirmingInactiveBranch ? form.dataset.confirmInactiveButton : form.dataset.confirmButton;
+    if (confirmTitle && !form.dataset.confirmed) {
         if (confirmation?.showModal) {
             event.preventDefault();
             pendingConfirmation = { form, submitter: event.submitter };
-            confirmation.querySelector('h2').textContent = form.dataset.confirmTitle;
-            confirmation.querySelector('[data-confirm-message]').textContent = form.dataset.confirmMessage;
+            confirmation.querySelector('h2').textContent = confirmTitle;
+            confirmation.querySelector('[data-confirm-message]').textContent = confirmMessage;
             const details = confirmation.querySelector('dl'); details.replaceChildren();
             const fixed = form.dataset.confirmContext;
             if (fixed) { const term = document.createElement('dt'); term.textContent = 'Konteks'; const description = document.createElement('dd'); description.textContent = fixed; details.append(term, description); }
             for (const field of form.querySelectorAll('[data-confirm-label]')) {
                 const term = document.createElement('dt'); const value = document.createElement('dd');
                 term.textContent = field.dataset.confirmLabel;
-                value.textContent = field.tagName === 'SELECT' ? field.selectedOptions[0]?.textContent : field.value;
+                value.textContent = field.tagName === 'SELECT' ? field.selectedOptions[0]?.textContent : field.type === 'datetime-local' ? field.value.replace(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2}(?::\d{2})?)$/, '$3/$2/$1 $4 WIB') : field.value;
                 if (field.type === 'number') value.textContent = 'Rp' + new Intl.NumberFormat('id-ID').format(Number(field.value));
                 details.append(term, value);
             }
-            confirmation.querySelector('[data-confirm-accept]').textContent = form.dataset.confirmButton;
+            confirmation.querySelector('[data-confirm-accept]').textContent = confirmButton;
             confirmation.showModal(); confirmation.querySelector('[data-confirm-cancel]').focus();
             return;
         }
-        if (!window.confirm(form.dataset.confirmMessage)) { event.preventDefault(); return; }
+        if (!window.confirm(confirmMessage)) { event.preventDefault(); return; }
     }
     delete form.dataset.confirmed;
     if (form.action.endsWith('/checkout') && form.querySelector('[name="marketing_consent"]')?.checked && window.fbq) {
@@ -142,7 +150,7 @@ confirmation?.querySelector('[data-confirm-accept]').addEventListener('click', (
 window.addEventListener('pageshow', event => {
     if (event.persisted && document.querySelector('form[data-submitting]')) {
         document.querySelectorAll('form[data-submitting]').forEach(restoreForm);
-        toast('Halaman dipulihkan. Periksa status sebelum mengirim ulang tindakan sebelumnya.');
+        toast('Halaman dipulihkan. Periksa status sebelum mengirim ulang tindakan sebelumnya.', 'warning', true);
     }
 });
 document.addEventListener('click', async event => {
@@ -157,9 +165,9 @@ document.addEventListener('click', async event => {
             if (status) status.textContent = '';
             toast(copy.dataset.copyLabel || 'Nilai berhasil disalin.');
         } catch {
-            const message = 'Belum berhasil disalin. Salin nilai yang ditampilkan secara manual.';
-            if (status) status.textContent = message;
-            toast(message);
+            const message = 'Belum berhasil disalin. Salin nilai berikut secara manual.';
+            if (status) status.textContent = `${message} ${copy.dataset.copy}`;
+            toast(message, 'warning');
         } finally { copy.disabled = false; }
     }
     const scan = event.target.closest('[data-start-scanner]');

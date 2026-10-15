@@ -162,6 +162,22 @@ class PaymentFlowTest extends TestCase
         $this->getJson($checkout->json('payment_url'))->assertJsonPath('status','MENUNGGU_PEMBAYARAN')->assertJsonPath('voucher_url',null);
     }
 
+    public function test_approval_page_uses_server_time_validation_and_recovers_duplicate_references(): void
+    {
+        $this->travelTo(\Carbon\CarbonImmutable::parse('2026-10-14 12:00:00','Asia/Jakarta'));
+        $first=$this->postJson('/checkout',['name'=>'Pembayaran pertama','phone'=>'081234567890','service_consent'=>true])->assertCreated();
+        $second=$this->postJson('/checkout',['name'=>'Pembayaran kedua','phone'=>'081234567891','service_consent'=>true])->assertCreated();
+        $data=['merchant_ref'=>'MUTASI-DUPLIKAT','paid_at'=>'2026-10-14T11:00:00','amount'=>100000,'money_confirmed'=>true];
+        $this->actingAs(User::first());
+        $this->postJson('/admin/pesanan/'.$first->json('reference').'/approve',$data)->assertOk();
+        $page='/admin/pesanan/'.$second->json('reference');
+        $this->get($page)->assertOk()->assertSee('id="paid_at"',false)->assertDontSee('max="',false);
+        $this->from($page)->post('/admin/pesanan/'.$second->json('reference').'/approve',$data)->assertRedirect($page);
+        $this->get($page)->assertOk()
+            ->assertSee('Cari referensi ini di semua status pesanan')
+            ->assertSee('?search=MUTASI-DUPLIKAT&amp;status=',false);
+    }
+
     public function test_failed_queue_insert_rolls_back_payment_and_voucher(): void
     {
         $this->travelTo(\Carbon\CarbonImmutable::parse('2026-10-14 12:00:00','Asia/Jakarta'));

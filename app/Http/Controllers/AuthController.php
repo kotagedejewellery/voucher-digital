@@ -14,6 +14,6 @@ class AuthController extends Controller {
     }
     public function logout(Request $request) {
         Auth::logout(); $request->session()->invalidate(); $request->session()->regenerateToken();
-        return redirect('/admin/login');
+        return redirect('/admin/login')->with('success','Anda sudah keluar dari panel.')->with('feedback','toast');
     }
 }

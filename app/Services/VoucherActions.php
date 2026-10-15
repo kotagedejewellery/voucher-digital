@@ -41,7 +41,7 @@ class VoucherActions
                 return $voucher;
             },3);
         } catch (UniqueConstraintViolationException $e) {
-            $this->invalid('merchant_ref','Referensi penerimaan sudah dipakai. Cari referensi tersebut di daftar pesanan sebelum melanjutkan.');
+            $this->invalid('merchant_ref','Referensi penerimaan sudah dipakai. Gunakan tautan pencarian di bawah untuk memeriksa transaksi tersebut.');
         }
     }
 

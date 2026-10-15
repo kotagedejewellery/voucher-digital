@@ -33,6 +33,17 @@ class AdminAccessTest extends TestCase
         $this->get('/register')->assertNotFound();
     }
 
+    public function test_logout_ends_the_session_and_returns_feedback(): void
+    {
+        $user=User::factory()->create();
+        $this->withoutVite();
+        $this->actingAs($user)->get('/admin')->assertOk()->assertSee('data-confirm-title="Keluar dari panel?"',false);
+        $this->post('/admin/logout')->assertRedirect('/admin/login')
+            ->assertSessionHas('success','Anda sudah keluar dari panel.')
+            ->assertSessionHas('feedback','toast');
+        $this->get('/admin')->assertRedirect('/admin/login');
+    }
+
     public function test_deactivated_operator_loses_access_on_the_next_request(): void
     {
         $admin=User::factory()->create(); $operator=User::factory()->create();
