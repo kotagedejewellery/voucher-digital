@@ -22,7 +22,7 @@ flowchart LR
   O -->|input potongan manual setelah claim sukses| OLD[Sistem order existing]
 ```
 
-Panah ke order adalah tindakan manusia, bukan koneksi API aplikasi. Docker Compose: app PHP 8.4/Apache, worker/scheduler image sama, PostgreSQL 17 volume persisten. Healthcheck DB, migrasi sekali, secrets runtime dan ingress/HTTPS pengguna. [Compose](https://docs.docker.com/compose/intro/compose-application-model/), [readiness](https://docs.docker.com/compose/how-tos/startup-order/). Belum ada code/container/config Docker yang dibuat.
+Panah ke order adalah tindakan manusia, bukan koneksi API aplikasi. Docker Compose: app PHP 8.4/Apache, worker/scheduler image sama, PostgreSQL 17 volume persisten. Healthcheck DB, migrasi sekali, secrets runtime dan ingress/HTTPS pengguna. `compose.production.yml` menautkan app ke network Traefik eksternal tanpa membuka port host; PostgreSQL tetap internal. [Compose](https://docs.docker.com/compose/intro/compose-application-model/), [readiness](https://docs.docker.com/compose/how-tos/startup-order/), [deployment VPS](DEPLOYMENT-VPS.md).
 
 ## 2. Module dan interface
 
@@ -114,7 +114,7 @@ Tidak ada endpoint payment gateway, webhook bank, callback browser paid atau kon
 
 AGENTS: cache/invalidation QRIS versi/aset/cabang publik; status/admin/voucher/CSV private,no-store; pagination/proyeksi kolom, hindari N+1, indeks (status,created_at,id), paid_at, branch/confirmed_at dan unique lookup; scanner/code split/lazy, gambar ukuran tepat dan QR lossless; request dedup; memoization sesuai profiling; WA/Meta/CSV background. Scheduler hanya cleanup/pekerjaan terbatas, bukan approve bank otomatis.
 
-Backup/restore melalui hosting pengguna; container app/worker/scheduler image sama, db volume persisten. Belum ada aplikasi/migrasi/Dockerfile/Compose/test/live integration. Test wajib mengikuti PRD: duplicate receiving ref, concurrent approve/claim/transfer, rollback jobs, paid_at versus verified_at, policy/tier WIB, consent/original-customer Meta, upload/PII/CSV, retries dan Docker health/volume/restore.
+Backup/restore melalui hosting pengguna; container app/worker/scheduler image sama, db volume persisten. Dockerfile, Compose lokal dan template Compose produksi tersedia, tetapi DNS, VPS, backup restore nyata, serta integrasi eksternal belum dijalankan pada lingkungan produksi. Test wajib mengikuti PRD: duplicate receiving ref, concurrent approve/claim/transfer, rollback jobs, paid_at versus verified_at, policy/tier WIB, consent/original-customer Meta, upload/PII/CSV, retries dan Docker health/volume/restore.
 
 ## Implementasi lokal aktual
 

@@ -94,6 +94,10 @@ Untuk review UI sintetis gunakan `compose.qa.yaml` dengan **kedua** profile test
 
 Domain, hosting dan HTTPS mengikuti pilihan Anda. Gunakan environment production, APP_DEBUG=false, URL HTTPS dan SESSION_SECURE_COOKIE=true; batasi akses langsung app ke ingress yang Anda atur. Database tidak dipublikasikan. Atur trusted proxy sesuai IP/CIDR ingress bila diperlukan; jangan percaya header client secara menyeluruh.
 
+Untuk VPS yang memakai Traefik, gunakan [panduan deployment](docs/DEPLOYMENT-VPS.md), [`.env.production.example`](.env.production.example), dan [`compose.production.yml`](compose.production.yml). Image produksi yang sudah ada menjalankan Apache, sehingga tidak perlu menambah Nginx atau bind mount source pada server.
+
+Deploy otomatis setelah setup awal menggunakan [workflow GitHub Actions](.github/workflows/deploy-vps.yml). Lihat secret yang diperlukan dan urutan setup di panduan deployment.
+
 Cadangkan PostgreSQL, volume storage dan APP_KEY bersama. Jangan mengganti key atau menghapus volume pada sistem berisi data. QRIS dan file ekspor disimpan di storage privat; hanya asset merchant dilayani publik melalui route khusus. Cache privat/halaman voucher/admin tidak boleh diaktifkan di CDN. Jangan mencatat URL bearer pada log ingress.
 
 Sebelum melayani customer, uji QRIS asli/merchant/nominal, Meta Test Events dan operator nyata. Hasil lokal serta hal belum diperiksa tercatat di [handoff](docs/IMPLEMENTATION-HANDOFF.md).

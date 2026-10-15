@@ -1,0 +1,82 @@
+name: kgj-digital-voucher
+
+x-app: &app
+  image: kgj-digital-voucher:production
+  build:
+    context: .
+    target: production
+  env_file:
+    - .env.production
+  environment:
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_CONNECTION: pgsql
+    QUEUE_CONNECTION: database
+    CACHE_STORE: database
+    SESSION_DRIVER: database
+  volumes:
+    - app-storage:/var/www/html/storage
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks:
+    - internal
+  restart: unless-stopped
+
+services:
+  app:
+    <<: *app
+    networks:
+      - internal
+      - proxy
+    healthcheck:
+      test: ['CMD', 'php', '-r', 'exit(@file_get_contents("http://127.0.0.1/up") === false ? 1 : 0);']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'traefik.http.routers.kgj-voucher.rule=Host(`${VOUCHER_DOMAIN:?VOUCHER_DOMAIN wajib diatur}`)'
+      - 'traefik.http.routers.kgj-voucher.entrypoints=websecure'
+      - 'traefik.http.routers.kgj-voucher.tls=true'
+      - 'traefik.http.routers.kgj-voucher.tls.certresolver=letsencrypt'
+      - 'traefik.http.routers.kgj-voucher-http.rule=Host(`${VOUCHER_DOMAIN:?VOUCHER_DOMAIN wajib diatur}`)'
+      - 'traefik.http.routers.kgj-voucher-http.entrypoints=web'
+      - 'traefik.http.routers.kgj-voucher-http.middlewares=kgj-voucher-https'
+      - 'traefik.http.middlewares.kgj-voucher-https.redirectscheme.scheme=https'
+      - 'traefik.http.services.kgj-voucher.loadbalancer.server.port=80'
+
+  worker:
+    <<: *app
+    command: ['php', 'artisan', 'queue:work', '--sleep=2', '--tries=4', '--timeout=60', '--max-time=3600']
+
+  scheduler:
+    <<: *app
+    command: ['php', 'artisan', 'schedule:work']
+
+  postgres:
+    image: postgres:17.11-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?DB_DATABASE wajib diatur}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME wajib diatur}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diatur}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - internal
+    restart: unless-stopped
+
+volumes:
+  app-storage:
+  postgres-data:
+
+networks:
+  internal:
+  proxy:
+    external: true

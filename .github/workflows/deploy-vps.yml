@@ -1,0 +1,63 @@
+name: Deploy VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: voucher-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy ke VPS
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      VPS_SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+    steps:
+      - name: Validasi secrets deployment
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          test -n "$VPS_SSH_KEY"
+          test -n "$VPS_SSH_KNOWN_HOSTS"
+
+      - name: Siapkan koneksi SSH tervalidasi
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Build, migrasi, dan mulai ulang layanan
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "$VPS_USER@$VPS_HOST" 'bash -s' <<'REMOTE'
+              set -euo pipefail
+
+              cd /opt/apps/sistem-voucher-digital/voucher-digital
+              test -f .env.production
+              test -z "$(git status --porcelain --untracked-files=all)"
+
+              git fetch --prune origin main
+              git checkout main
+              git pull --ff-only origin main
+
+              docker compose --env-file .env.production -f compose.production.yml build
+              docker compose --env-file .env.production -f compose.production.yml up -d postgres
+              docker compose --env-file .env.production -f compose.production.yml run --rm app php artisan migrate --force
+              docker compose --env-file .env.production -f compose.production.yml up -d --wait --wait-timeout 90 app worker scheduler
+              docker compose --env-file .env.production -f compose.production.yml ps
+          REMOTE

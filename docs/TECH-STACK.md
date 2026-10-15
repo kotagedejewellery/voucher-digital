@@ -58,7 +58,7 @@ Satu image aplikasi PHP 8.4/Apache; image sama dipakai worker/scheduler; Postgre
 
 Multi-stage build memisahkan Composer/Vite build dari runtime; Node hanya builder. app/worker/scheduler menunggu healthcheck DB; migrasi sekali sebagai langkah deploy, tidak berlomba di tiap proses. Secrets/APP_KEY runtime, DB tidak publik; asset QRIS dan storage privat memiliki volume/storage yang tetap saat container diganti. [Multi-stage](https://docs.docker.com/build/building/multi-stage/), [Compose](https://docs.docker.com/compose/intro/compose-application-model/), [startup readiness](https://docs.docker.com/compose/how-tos/startup-order/)
 
-Domain/hosting/ingress/HTTPS/port mapping/biaya milik pengguna. Implementasi menyediakan Dockerfile/compose.yaml, environment example tanpa rahasia, build/migration/start/test/backup guidance. Tidak provision DNS/server atau deploy sekarang. Belum ada konfigurasi/image/container yang dibuat.
+Domain/hosting/ingress/HTTPS/port mapping/biaya milik pengguna. Implementasi menyediakan Dockerfile/compose.yaml untuk lokal dan `compose.production.yml` untuk Traefik VPS, beserta environment example tanpa rahasia serta panduan build/migration/start/backup. Tidak provision DNS/server atau menjalankan deploy. Lihat [deployment VPS](DEPLOYMENT-VPS.md).
 
 ## 5. Konsistensi, performa dan pengujian
 
