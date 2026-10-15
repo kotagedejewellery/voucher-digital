@@ -1,0 +1,488 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T09:49:14.591Z",
+  "title": "Design System: Voucher Digital Sat-Set",
+  "extensions": {
+    "colorMeta": {
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Putih hangat",
+        "tonalRamp": [
+          "oklch(15% 0.00409 121.560)",
+          "oklch(25% 0.00409 121.560)",
+          "oklch(35% 0.00409 121.560)",
+          "oklch(45% 0.00409 121.560)",
+          "oklch(55% 0.00409 121.560)",
+          "oklch(65% 0.00409 121.560)",
+          "oklch(80% 0.00409 121.560)",
+          "oklch(95% 0.00409 121.560)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Putih permukaan",
+        "tonalRamp": [
+          "oklch(15% 0.00000 0.000)",
+          "oklch(25% 0.00000 0.000)",
+          "oklch(35% 0.00000 0.000)",
+          "oklch(45% 0.00000 0.000)",
+          "oklch(55% 0.00000 0.000)",
+          "oklch(65% 0.00000 0.000)",
+          "oklch(80% 0.00000 0.000)",
+          "oklch(95% 0.00000 0.000)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta hijau gelap",
+        "tonalRamp": [
+          "oklch(15% 0.03817 170.752)",
+          "oklch(25% 0.03817 170.752)",
+          "oklch(35% 0.03817 170.752)",
+          "oklch(45% 0.03817 170.752)",
+          "oklch(55% 0.03817 170.752)",
+          "oklch(65% 0.03817 170.752)",
+          "oklch(80% 0.03817 170.752)",
+          "oklch(95% 0.03817 170.752)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Teks pendamping",
+        "tonalRamp": [
+          "oklch(15% 0.02983 164.651)",
+          "oklch(25% 0.02983 164.651)",
+          "oklch(35% 0.02983 164.651)",
+          "oklch(45% 0.02983 164.651)",
+          "oklch(55% 0.02983 164.651)",
+          "oklch(65% 0.02983 164.651)",
+          "oklch(80% 0.02983 164.651)",
+          "oklch(95% 0.02983 164.651)"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Hijau dalam",
+        "tonalRamp": [
+          "oklch(15% 0.05932 175.114)",
+          "oklch(25% 0.05932 175.114)",
+          "oklch(35% 0.05932 175.114)",
+          "oklch(45% 0.05932 175.114)",
+          "oklch(55% 0.05932 175.114)",
+          "oklch(65% 0.05932 175.114)",
+          "oklch(80% 0.05932 175.114)",
+          "oklch(95% 0.05932 175.114)"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Hijau tekan",
+        "tonalRamp": [
+          "oklch(15% 0.04966 174.289)",
+          "oklch(25% 0.04966 174.289)",
+          "oklch(35% 0.04966 174.289)",
+          "oklch(45% 0.04966 174.289)",
+          "oklch(55% 0.04966 174.289)",
+          "oklch(65% 0.04966 174.289)",
+          "oklch(80% 0.04966 174.289)",
+          "oklch(95% 0.04966 174.289)"
+        ]
+      },
+      "control": {
+        "role": "neutral",
+        "displayName": "Garis kontrol",
+        "tonalRamp": [
+          "oklch(15% 0.02573 161.263)",
+          "oklch(25% 0.02573 161.263)",
+          "oklch(35% 0.02573 161.263)",
+          "oklch(45% 0.02573 161.263)",
+          "oklch(55% 0.02573 161.263)",
+          "oklch(65% 0.02573 161.263)",
+          "oklch(80% 0.02573 161.263)",
+          "oklch(95% 0.02573 161.263)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Garis pemisah",
+        "tonalRamp": [
+          "oklch(15% 0.01201 145.476)",
+          "oklch(25% 0.01201 145.476)",
+          "oklch(35% 0.01201 145.476)",
+          "oklch(45% 0.01201 145.476)",
+          "oklch(55% 0.01201 145.476)",
+          "oklch(65% 0.01201 145.476)",
+          "oklch(80% 0.01201 145.476)",
+          "oklch(95% 0.01201 145.476)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Metal hangat",
+        "tonalRamp": [
+          "oklch(15% 0.10197 85.708)",
+          "oklch(25% 0.10197 85.708)",
+          "oklch(35% 0.10197 85.708)",
+          "oklch(45% 0.10197 85.708)",
+          "oklch(55% 0.10197 85.708)",
+          "oklch(65% 0.10197 85.708)",
+          "oklch(80% 0.10197 85.708)",
+          "oklch(95% 0.10197 85.708)"
+        ]
+      },
+      "success": {
+        "role": "status",
+        "displayName": "Status sukses",
+        "tonalRamp": [
+          "oklch(15% 0.09496 156.722)",
+          "oklch(25% 0.09496 156.722)",
+          "oklch(35% 0.09496 156.722)",
+          "oklch(45% 0.09496 156.722)",
+          "oklch(55% 0.09496 156.722)",
+          "oklch(65% 0.09496 156.722)",
+          "oklch(80% 0.09496 156.722)",
+          "oklch(95% 0.09496 156.722)"
+        ]
+      },
+      "warning": {
+        "role": "status",
+        "displayName": "Status perhatian",
+        "tonalRamp": [
+          "oklch(15% 0.09253 66.935)",
+          "oklch(25% 0.09253 66.935)",
+          "oklch(35% 0.09253 66.935)",
+          "oklch(45% 0.09253 66.935)",
+          "oklch(55% 0.09253 66.935)",
+          "oklch(65% 0.09253 66.935)",
+          "oklch(80% 0.09253 66.935)",
+          "oklch(95% 0.09253 66.935)"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Status error",
+        "tonalRamp": [
+          "oklch(15% 0.14438 23.150)",
+          "oklch(25% 0.14438 23.150)",
+          "oklch(35% 0.14438 23.150)",
+          "oklch(45% 0.14438 23.150)",
+          "oklch(55% 0.14438 23.150)",
+          "oklch(65% 0.14438 23.150)",
+          "oklch(80% 0.14438 23.150)",
+          "oklch(95% 0.14438 23.150)"
+        ]
+      },
+      "info": {
+        "role": "status",
+        "displayName": "Status informasi",
+        "tonalRamp": [
+          "oklch(15% 0.08792 242.700)",
+          "oklch(25% 0.08792 242.700)",
+          "oklch(35% 0.08792 242.700)",
+          "oklch(45% 0.08792 242.700)",
+          "oklch(55% 0.08792 242.700)",
+          "oklch(65% 0.08792 242.700)",
+          "oklch(80% 0.08792 242.700)",
+          "oklch(95% 0.08792 242.700)"
+        ]
+      },
+      "focus": {
+        "role": "status",
+        "displayName": "Fokus",
+        "tonalRamp": [
+          "oklch(15% 0.13442 251.953)",
+          "oklch(25% 0.13442 251.953)",
+          "oklch(35% 0.13442 251.953)",
+          "oklch(45% 0.13442 251.953)",
+          "oklch(55% 0.13442 251.953)",
+          "oklch(65% 0.13442 251.953)",
+          "oklch(80% 0.13442 251.953)",
+          "oklch(95% 0.13442 251.953)"
+        ]
+      },
+      "offer-muted": {
+        "role": "neutral",
+        "displayName": "Teks bidang hijau",
+        "tonalRamp": [
+          "oklch(15% 0.01409 138.713)",
+          "oklch(25% 0.01409 138.713)",
+          "oklch(35% 0.01409 138.713)",
+          "oklch(45% 0.01409 138.713)",
+          "oklch(55% 0.01409 138.713)",
+          "oklch(65% 0.01409 138.713)",
+          "oklch(80% 0.01409 138.713)",
+          "oklch(95% 0.01409 138.713)"
+        ]
+      },
+      "status-info-bg": {
+        "role": "status",
+        "displayName": "Latar informasi",
+        "tonalRamp": [
+          "oklch(15% 0.00930 242.838)",
+          "oklch(25% 0.00930 242.838)",
+          "oklch(35% 0.00930 242.838)",
+          "oklch(45% 0.00930 242.838)",
+          "oklch(55% 0.00930 242.838)",
+          "oklch(65% 0.00930 242.838)",
+          "oklch(80% 0.00930 242.838)",
+          "oklch(95% 0.00930 242.838)"
+        ]
+      },
+      "status-success-bg": {
+        "role": "status",
+        "displayName": "Latar sukses",
+        "tonalRamp": [
+          "oklch(15% 0.01496 151.770)",
+          "oklch(25% 0.01496 151.770)",
+          "oklch(35% 0.01496 151.770)",
+          "oklch(45% 0.01496 151.770)",
+          "oklch(55% 0.01496 151.770)",
+          "oklch(65% 0.01496 151.770)",
+          "oklch(80% 0.01496 151.770)",
+          "oklch(95% 0.01496 151.770)"
+        ]
+      },
+      "status-warning-bg": {
+        "role": "status",
+        "displayName": "Latar perhatian",
+        "tonalRamp": [
+          "oklch(15% 0.03009 83.634)",
+          "oklch(25% 0.03009 83.634)",
+          "oklch(35% 0.03009 83.634)",
+          "oklch(45% 0.03009 83.634)",
+          "oklch(55% 0.03009 83.634)",
+          "oklch(65% 0.03009 83.634)",
+          "oklch(80% 0.03009 83.634)",
+          "oklch(95% 0.03009 83.634)"
+        ]
+      },
+      "status-danger-bg": {
+        "role": "status",
+        "displayName": "Latar error",
+        "tonalRamp": [
+          "oklch(15% 0.01637 22.083)",
+          "oklch(25% 0.01637 22.083)",
+          "oklch(35% 0.01637 22.083)",
+          "oklch(45% 0.01637 22.083)",
+          "oklch(55% 0.01637 22.083)",
+          "oklch(65% 0.01637 22.083)",
+          "oklch(80% 0.01637 22.083)",
+          "oklch(95% 0.01637 22.083)"
+        ]
+      },
+      "status-neutral-bg": {
+        "role": "status",
+        "displayName": "Latar netral",
+        "tonalRamp": [
+          "oklch(15% 0.00571 128.527)",
+          "oklch(25% 0.00571 128.527)",
+          "oklch(35% 0.00571 128.527)",
+          "oklch(45% 0.00571 128.527)",
+          "oklch(55% 0.00571 128.527)",
+          "oklch(65% 0.00571 128.527)",
+          "oklch(80% 0.00571 128.527)",
+          "oklch(95% 0.00571 128.527)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "display",
+        "purpose": "Judul offer dengan scale responsif."
+      },
+      "headline": {
+        "displayName": "headline",
+        "purpose": "Judul halaman."
+      },
+      "title": {
+        "displayName": "title",
+        "purpose": "Judul section."
+      },
+      "body": {
+        "displayName": "body",
+        "purpose": "Isi pelanggan 16px dan admin 15px; input desktop mewarisi body, input/select/textarea mobile 16px."
+      },
+      "label": {
+        "displayName": "label",
+        "purpose": "Label dan tombol."
+      },
+      "metadata": {
+        "displayName": "metadata",
+        "purpose": "Hint dan metadata."
+      },
+      "amount": {
+        "displayName": "amount",
+        "purpose": "Nominal umum; ringkasan customer memakai scale lebih besar."
+      },
+      "status": {
+        "displayName": "status",
+        "purpose": "Badge status faktual."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "background-color 180ms ease-out, border-color 180ms ease-out",
+        "purpose": "Feedback tombol; transition none pada reduced-motion."
+      },
+      {
+        "name": "anchor-scroll",
+        "value": "smooth",
+        "purpose": "Scroll anchor; auto pada reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1600px"
+      },
+      {
+        "name": "compact-desktop-max",
+        "value": "1199px"
+      },
+      {
+        "name": "drawer-max",
+        "value": "1023px"
+      },
+      {
+        "name": "mobile-max",
+        "value": "767px"
+      },
+      {
+        "name": "narrow-mobile-max",
+        "value": "359px"
+      }
+    ],
+    "tonalRampPurpose": "Synthesized OKLCH display metadata only; does not add application palette tokens."
+  },
+  "components": [
+    {
+      "name": "Tombol utama",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tindakan utama pada tahap aktif.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Periksa status terbaru</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--color-primary,#174C40);color:var(--color-surface,#FFFFFF);font-size:14px;font-weight:600;line-height:1.55;text-decoration:none;cursor:pointer;transition:background-color 180ms ease-out,border-color 180ms ease-out;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-primary:hover{background:var(--color-primary-hover,#103A30);color:var(--color-surface,#FFFFFF);}.ds-primary:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}.ds-primary:disabled{background:var(--color-rule,#DDE4DD);border-color:var(--color-rule,#DDE4DD);color:var(--color-muted,#52675D);cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none;}}"
+    },
+    {
+      "name": "Tombol sekunder",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Tindakan pendamping seperti unduh atau salin.",
+      "html": "<button class=\"ds-secondary\" type=\"button\">Unduh gambar QRIS asli</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--color-primary,#174C40);color:var(--color-surface,#FFFFFF);font-size:14px;font-weight:600;line-height:1.55;text-decoration:none;cursor:pointer;transition:background-color 180ms ease-out,border-color 180ms ease-out;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-secondary:hover{background:var(--color-primary-hover,#103A30);color:var(--color-surface,#FFFFFF);}.ds-secondary:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}.ds-secondary:disabled{background:var(--color-rule,#DDE4DD);border-color:var(--color-rule,#DDE4DD);color:var(--color-muted,#52675D);cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none;}}.ds-secondary{background:var(--color-surface,#FFFFFF);border-color:var(--color-control,#75877D);color:var(--color-primary,#174C40);}.ds-secondary:hover{background:var(--color-canvas,#F7F8F5);color:var(--color-primary,#174C40);}"
+    },
+    {
+      "name": "Tombol light",
+      "kind": "button",
+      "refersTo": "button-light",
+      "description": "Tombol putih pada bidang hijau.",
+      "html": "<button class=\"ds-light\" type=\"button\">Buka pesanan</button>",
+      "css": ".ds-light{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--color-primary,#174C40);color:var(--color-surface,#FFFFFF);font-size:14px;font-weight:600;line-height:1.55;text-decoration:none;cursor:pointer;transition:background-color 180ms ease-out,border-color 180ms ease-out;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-light:hover{background:var(--color-surface,#FFFFFF);color:var(--color-primary,#174C40);}.ds-light:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}.ds-light:disabled{background:var(--color-rule,#DDE4DD);border-color:var(--color-rule,#DDE4DD);color:var(--color-muted,#52675D);cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-light{transition:none;}}.ds-light{background:var(--color-surface,#FFFFFF);color:var(--color-primary,#174C40);}.ds-light:hover{background:var(--color-surface,#FFFFFF);color:var(--color-primary,#174C40);}"
+    },
+    {
+      "name": "Field identitas",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Label terlihat dan fokus keyboard yang jelas.",
+      "html": "<label class=\"ds-label\" for=\"ds-name\">Nama lengkap</label><input class=\"ds-input\" id=\"ds-name\" type=\"text\" placeholder=\"Nama Anda\">",
+      "css": ".ds-label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;color:var(--color-ink,#19352C);font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-input{width:100%;padding:12px 14px;border:1px solid var(--color-control,#75877D);border-radius:8px;min-height:48px;background:var(--color-surface,#FFFFFF);color:var(--color-ink,#19352C);caret-color:var(--color-primary,#174C40);font-size:16px;line-height:1.55;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-input::placeholder{color:var(--color-muted,#52675D);opacity:1;}.ds-input[aria-invalid=true]{border-color:var(--color-danger,#9C2F32);}.ds-input:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}"
+    },
+    {
+      "name": "Navigasi admin",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Tujuan vertikal di sidebar dan drawer dengan penanda aktif.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navigasi admin\"><a href=\"#ringkasan\">Ringkasan</a><a href=\"#pesanan\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M4 5h16v5a2 2 0 0 0 0 4v5H4v-5a2 2 0 0 0 0-4z M15 5v3 M15 11v2 M15 16v3\"/></svg>Pesanan &amp; Voucher</a><a href=\"#pengaturan\">Pengaturan</a></nav>",
+      "css": ".ds-nav{display:grid;gap:8px;padding:20px;background:var(--color-primary,#174C40);font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-nav>a{display:flex;align-items:center;gap:12px;min-height:48px;padding:12px;border-radius:8px;color:var(--color-offer-muted,#E6EDE4);text-decoration:none;font-size:14px;line-height:1.55;}.ds-nav>a:hover,.ds-nav>a[aria-current=page]{background:#F2F5EE;color:var(--color-primary,#174C40);}.ds-nav>a[aria-current=page]{font-weight:650;}.ds-nav svg{width:20px;height:20px;flex-shrink:0;}.ds-nav>a:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}"
+    },
+    {
+      "name": "Badge status",
+      "kind": "chip",
+      "refersTo": "status",
+      "description": "Status faktual menggunakan teks dan pasangan warna.",
+      "html": "<span class=\"ds-status\">Informasi</span> <span class=\"ds-status ds-paid\">Terverifikasi</span> <span class=\"ds-status ds-pending\">Menunggu verifikasi</span> <span class=\"ds-status ds-failed\">Pengiriman gagal</span> <span class=\"ds-status ds-neutral\">Tidak dikirim</span>",
+      "css": ".ds-status{display:inline-flex;align-items:center;font-size:12px;line-height:1.5;font-weight:600;color:var(--color-info,#255E86);background:var(--color-status-info-bg,#ECF2F7);border-radius:6px;padding:5px 9px;overflow-wrap:anywhere;max-width:100%;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-paid{color:var(--color-success,#226B45);background:var(--color-status-success-bg,#EAF4EC);}.ds-pending{color:var(--color-warning,#80521A);background:var(--color-status-warning-bg,#FBF0DB);}.ds-failed{color:var(--color-danger,#9C2F32);background:var(--color-status-danger-bg,#FBECEB);}.ds-neutral{color:var(--color-muted,#52675D);background:var(--color-status-neutral-bg,#EFF1ED);}"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Permukaan putih datar untuk satu kelompok tugas.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Voucher Anda</h2><p class=\"ds-panel-copy\">Nilai mengikuti usia voucher saat klaim.</p></section>",
+      "css": ".ds-panel{padding:28px;border:1px solid var(--color-rule,#DDE4DD);border-radius:16px;background:var(--color-surface,#FFFFFF);color:var(--color-ink,#19352C);font-size:16px;line-height:1.55;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-panel-title{font-size:24px;font-weight:600;line-height:1.18;letter-spacing:-.025em;margin:0 0 16px;}.ds-panel-copy{margin:0 0 16px;max-width:72ch;}@media(max-width:767px){.ds-panel{padding:22px;border-radius:12px;}}"
+    },
+    {
+      "name": "Voucher promosi",
+      "kind": "card",
+      "refersTo": "offer",
+      "description": "Offer HTML dengan nominal kuat dan garis emas tipis.",
+      "html": "<section class=\"ds-offer\"><div class=\"ds-offer-top\"><h2>Voucher Sat-Set</h2><span>Kotagede Jewellery</span></div><div class=\"ds-offer-main\"><p>Potongan hingga</p><p class=\"ds-offer-amount\">Rp800.000</p></div><div class=\"ds-offer-bottom\"><div><p>Harga voucher</p><strong>Rp100.000</strong></div><div><p>Minimum transaksi</p><strong>Rp8.000.000</strong></div></div></section>",
+      "css": ".ds-offer{background:var(--color-primary,#174C40);color:var(--color-surface,#FFFFFF);border-radius:16px;padding:40px;font-size:16px;line-height:1.55;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-offer-top{display:flex;justify-content:space-between;gap:16px;align-items:center;padding-bottom:28px;border-bottom:1px solid var(--color-gold,#D8B66B);}.ds-offer-top h2{font-size:26px;font-weight:600;line-height:1.18;letter-spacing:-.025em;margin:0;}.ds-offer-top span{color:var(--color-offer-muted,#E6EDE4);font-size:14px;}.ds-offer-main{padding-block:32px;}.ds-offer-main p{margin:0;color:var(--color-offer-muted,#E6EDE4);}.ds-offer-main .ds-offer-amount{font-size:clamp(44px,4.5vw,72px);font-weight:650;line-height:1.12;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--color-surface,#FFFFFF);margin:12px 0;}.ds-offer-bottom{border-top:1px dashed #7BA58F;padding-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;}.ds-offer-bottom p{font-size:13px;color:var(--color-offer-muted,#E6EDE4);margin:0 0 4px;}.ds-offer-bottom strong{font-size:22px;}@media(min-width:1600px){.ds-offer{padding:48px;}}@media(max-width:1199px){.ds-offer{padding:28px;}.ds-offer-bottom strong{font-size:20px;}}@media(max-width:767px){.ds-offer-main .ds-offer-amount{font-size:48px;}.ds-offer-top h2{font-size:22px;}.ds-offer-bottom{gap:16px;}}@media(max-width:359px){.ds-offer{padding:22px;}.ds-offer-main .ds-offer-amount{font-size:42px;}.ds-offer-bottom strong{font-size:18px;}}"
+    },
+    {
+      "name": "Konfirmasi tindakan",
+      "kind": "custom",
+      "refersTo": "confirmation",
+      "description": "Ringkasan tindakan sensitif; aplikasi membuka dialog native dengan fokus awal Batal dan nilai input terbaru. Contoh statis terbuka.",
+      "html": "<dialog class=\"ds-confirm\" open aria-labelledby=\"ds-confirm-title\" aria-describedby=\"ds-confirm-message\"><h2 id=\"ds-confirm-title\">Kunci potongan voucher?</h2><p id=\"ds-confirm-message\">Voucher akan menjadi terpakai. Masukkan potongan terkunci ke order yang sama; klaim tidak dapat dibatalkan otomatis.</p><dl class=\"ds-confirm-detail\"><dt>Cabang</dt><dd>Cabang pilihan</dd><dt>Nomor order</dt><dd>ORDER-CONTOH</dd></dl><div class=\"ds-confirm-actions\"><button type=\"button\" class=\"ds-confirm-cancel\">Batal</button><button type=\"button\" class=\"ds-confirm-primary\">Kunci potongan dan klaim</button></div></dialog>",
+      "css": ".ds-confirm{position:relative;margin:auto;width:min(560px,calc(100% - 32px));max-height:calc(100dvh - 32px);padding:32px;border:1px solid var(--color-rule,#DDE4DD);border-radius:16px;background:var(--color-surface,#FFFFFF);color:var(--color-ink,#19352C);overflow-y:auto;font:16px/1.55 var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-confirm::backdrop{background:#142D26B8;}.ds-confirm h2{font-size:24px;font-weight:600;line-height:1.18;letter-spacing:-.025em;margin:0 0 16px;}.ds-confirm p{margin:0 0 16px;max-width:72ch;}.ds-confirm-detail{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,2fr);gap:14px 20px;margin:24px 0;font-size:14px;}.ds-confirm-detail dt{color:var(--color-muted,#52675D);}.ds-confirm-detail dd{margin:0;font-weight:500;overflow-wrap:anywhere;}.ds-confirm-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px;}.ds-confirm-actions button{max-width:100%;white-space:normal;}.ds-confirm-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 20px;border:1px solid transparent;border-radius:8px;background:var(--color-primary,#174C40);color:var(--color-surface,#FFFFFF);font-size:14px;font-weight:600;line-height:1.55;text-decoration:none;cursor:pointer;transition:background-color 180ms ease-out,border-color 180ms ease-out;font-family:var(--font-sans,system-ui,'Segoe UI',sans-serif);}.ds-confirm-primary:hover{background:var(--color-primary-hover,#103A30);color:var(--color-surface,#FFFFFF);}.ds-confirm-primary:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}.ds-confirm-primary:disabled{background:var(--color-rule,#DDE4DD);border-color:var(--color-rule,#DDE4DD);color:var(--color-muted,#52675D);cursor:not-allowed;}@media(prefers-reduced-motion:reduce){.ds-confirm-primary{transition:none;}}.ds-confirm-cancel{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 20px;border:1px solid var(--color-control,#75877D);border-radius:8px;background:var(--color-surface,#FFFFFF);color:var(--color-primary,#174C40);font:600 14px/1.55 var(--font-sans,system-ui,'Segoe UI',sans-serif);cursor:pointer;transition:background-color 180ms ease-out,border-color 180ms ease-out;}.ds-confirm-cancel:hover{background:var(--color-canvas,#F7F8F5);}.ds-confirm-cancel:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-confirm-cancel{transition:none;}}@media(max-width:767px){.ds-confirm{padding:24px;border-radius:12px;}.ds-confirm-detail{grid-template-columns:1fr;gap:4px;}.ds-confirm-detail dd{margin-bottom:12px;}.ds-confirm-actions{flex-direction:column;}.ds-confirm-actions button{width:100%;}}"
+    },
+    {
+      "name": "Toast feedback",
+      "kind": "custom",
+      "refersTo": "feedback-toast",
+      "description": "Pesan rutin nonblocking dengan tutup berlabel; timeout runtime 6 detik mempertahankan pesan bila fokus masih di dalamnya. Contoh distage agar posisi fixed terikat pada preview.",
+      "html": "<div class=\"ds-feedback-stage\"><div class=\"ds-feedback\" role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"><span>Link pesanan tersalin. Jaga link ini tetap pribadi.</span><button type=\"button\" aria-label=\"Tutup pesan\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m6 6 12 12 M18 6 6 18\"/></svg></button></div></div>",
+      "css": ".ds-feedback-stage{position:relative;transform:translate(0);min-height:160px;}.ds-feedback{position:fixed;bottom:24px;right:24px;z-index:60;width:min(440px,calc(100% - 32px));display:flex;align-items:flex-start;gap:12px;margin:0;padding:18px 20px;border:1px solid #AFCAB9;border-radius:8px;background:#EDF5EF;color:var(--color-success,#226B45);font:14px/1.55 var(--font-sans,system-ui,'Segoe UI',sans-serif);overflow-wrap:anywhere;}.ds-feedback span{flex:1;overflow-wrap:anywhere;}.ds-feedback button{flex-shrink:0;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:8px;background:transparent;color:var(--color-primary,#174C40);cursor:pointer;}.ds-feedback button:hover{color:var(--color-primary-hover,#103A30);}.ds-feedback button:focus-visible{outline:3px solid var(--color-focus,#1A65AD);outline-offset:3px;}.ds-feedback svg{width:20px;height:20px;}@media(max-width:767px){.ds-feedback{bottom:16px;right:16px;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Kartu layanan butik",
+    "overview": "Hijau dalam, putih hangat, detail emas kecil dan tipografi sistem membentuk layanan yang bersih, profesional dan sederhana. Angka rupiah kuat serta status yang jelas membantu pelanggan memahami voucher dan operator menyelesaikan tugas. Identitas yang dipin pengguna dipertahankan; komposisi baru memberi ruang layar yang lebih berguna.\n\nPermukaan datar, garis halus dan sudut lembut menjaga hierarki. Satu tindakan utama memimpin setiap tahap; detail sekunder dapat dibuka sesuai kebutuhan. HTML membentuk kartu promosi, SVG native membentuk ikon garis, dan QR voucher dihasilkan saat runtime. QRIS merchant menggunakan gambar asli; logo, foto dan informasi cabang resmi menunggu aset KGJ.",
+    "keyCharacteristics": [
+      "Putih hangat dengan tindakan hijau dalam dan emas yang hemat.",
+      "Angka rupiah tegas; status selalu memiliki teks.",
+      "Layout desktop fluid, kolom mobile ringkas dan permukaan datar.",
+      "Navigasi operator tetap di desktop dan drawer native di mobile.",
+      "QRIS pembayaran utuh dan QR voucher memiliki fungsi berbeda."
+    ],
+    "rules": [
+      {
+        "name": "The Status Text Rule",
+        "body": "Setiap status memiliki teks yang dapat dibaca tanpa membedakan warna.",
+        "section": "colors"
+      },
+      {
+        "name": "The Money Rule",
+        "body": "Rupiah memakai pemisah ribuan titik; waktu transaksi dan deadline diberi label WIB.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Pemisahan informasi memakai nada permukaan, garis dan jarak sebelum menambah efek kedalaman.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Correctable Error Rule",
+        "body": "Error yang perlu diperbaiki tetap dekat data dan membuka jalur fokus; toast hanya melengkapi feedback tindakan.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do gunakan putih hangat, hijau dalam, font sistem dan aksen emas kecil yang disetujui.",
+      "Do pakai ruang desktop fluid dan susun keputusan mobile dalam satu kolom yang jelas.",
+      "Do tampilkan nominal, status teks, label, fokus visible dan alternatif input manual dekat tindakan.",
+      "Do pertahankan QRIS merchant utuh dan bedakan QR voucher dari QRIS pembayaran.",
+      "Do gunakan pagination server, disclosure dan lazy scanner sesuai kebutuhan nyata."
+    ],
+    "donts": [
+      "Don't menambahkan identitas/foto/QRIS rekaan atau mengubah payload gambar merchant.",
+      "Don't menyampaikan status dengan warna saja atau menghilangkan fokus keyboard.",
+      "Don't menyamakan klik pelanggan dengan pembayaran verified atau scan dengan klaim.",
+      "Don't memasukkan aturan bisnis baru atau detail credential/tracking ke alur pelanggan.",
+      "Don't mengklaim fixture, screenshot atau output detector parsial sebagai sertifikasi aksesibilitas atau transaksi live."
+    ]
+  }
+}

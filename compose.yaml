@@ -1,0 +1,85 @@
+name: kgj-digital-voucher
+x-app: &app
+  image: kgj-digital-voucher:local
+  build:
+    context: .
+    target: production
+  env_file: .env
+  environment:
+    DB_HOST: db
+    DB_PORT: 5432
+    DB_CONNECTION: pgsql
+    QUEUE_CONNECTION: database
+    CACHE_STORE: database
+    SESSION_DRIVER: database
+  volumes:
+    - app-storage:/var/www/html/storage
+  depends_on:
+    db:
+      condition: service_healthy
+  restart: unless-stopped
+services:
+  app:
+    <<: *app
+    ports:
+      - '127.0.0.1:${APP_PORT:-8088}:80'
+    healthcheck:
+      test: ['CMD', 'php', '-r', 'exit(@file_get_contents("http://127.0.0.1/up") === false ? 1 : 0);']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  worker:
+    <<: *app
+    command: ['php', 'artisan', 'queue:work', '--sleep=2', '--tries=4', '--timeout=60', '--max-time=3600']
+  scheduler:
+    <<: *app
+    command: ['php', 'artisan', 'schedule:work']
+  db:
+    image: postgres:17.11-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD wajib diatur}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  test:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    environment:
+      APP_ENV: testing
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: test-db
+      DB_DATABASE: voucher_test
+      DB_USERNAME: voucher_test
+      DB_PASSWORD: test-only-password
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+      QUEUE_CONNECTION: database
+    depends_on:
+      test-db:
+        condition: service_healthy
+  test-db:
+    profiles: [test]
+    image: postgres:17.11-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_DB: voucher_test
+      POSTGRES_USER: voucher_test
+      POSTGRES_PASSWORD: test-only-password
+    tmpfs: /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U voucher_test -d voucher_test']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  app-storage:
+  postgres-data:

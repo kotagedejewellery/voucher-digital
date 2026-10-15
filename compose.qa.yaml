@@ -1,0 +1,27 @@
+services:
+  qa:
+    image: kgj-digital-voucher:local
+    env_file: .env
+    environment:
+      APP_ENV: local
+      APP_URL: http://localhost:8089
+      DB_CONNECTION: pgsql
+      DB_HOST: test-db
+      DB_DATABASE: voucher_test
+      DB_USERNAME: voucher_test
+      DB_PASSWORD: test-only-password
+      QUEUE_CONNECTION: database
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      META_PIXEL_ID: ''
+      META_DATASET_ID: ''
+      META_ACCESS_TOKEN: ''
+      WACO_ENABLED: 'false'
+    ports: ['127.0.0.1:8089:80']
+    volumes: [qa-storage:/var/www/html/storage]
+    depends_on:
+      test-db:
+        condition: service_healthy
+    profiles: [qa]
+volumes:
+  qa-storage:

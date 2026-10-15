@@ -1,0 +1,1 @@
+<x-error-page code="500" title="Ada kendala pada sistem." message="Kami belum dapat menyelesaikan permintaan ini. Periksa status pesanan atau voucher sebelum mengulang tindakan, lalu hubungi admin/CS bila masih terkendala."/>

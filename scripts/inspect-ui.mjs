@@ -1,0 +1,227 @@
+import { chromium } from '@playwright/test';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+
+const credentials = JSON.parse(await readFile('.local/admin.json', 'utf8'));
+const out = '.impeccable/review/enhancement';
+await mkdir(out, { recursive: true });
+const browser = await chromium.launch({ channel: 'msedge', headless: true });
+const reports = [];
+const errors = [];
+const admin = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+const observe = (page) => page.on('pageerror', error => errors.push(error.message));
+observe(admin);
+const login = async (page, base, inspectLogin = false) => {
+  const response = await page.goto(base + '/admin/login'); assert.equal(response.status(), 200);
+  if (inspectLogin) await capture(page, 'login');
+  await page.locator('#email').fill(credentials.email); await page.locator('#password').fill(credentials.password);
+  await Promise.all([page.waitForURL(base + '/admin'), page.getByRole('button', { name: 'Masuk', exact: true }).click()]);
+};
+const capture = async (page, name, widths = [320, 390, 768, 1024, 1440, 1920]) => {
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: width < 768 ? 844 : 1000 });
+    await page.mouse.move(0, 0);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(async () => {
+      await Promise.all([...document.images].filter(img => !img.closest('details:not([open])')).map(async img => { img.loading = 'eager'; await img.decode().catch(() => {}); }));
+    });
+    await page.screenshot({ path: `${out}/${name}-${width}.png`, fullPage: true, animations: 'disabled' });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    assert.equal(overflow, false, `${name} overflows at ${width}`);
+    reports.push({ surface: name, width, overflow });
+  }
+};
+try {
+  const publicPage = await browser.newPage(); observe(publicPage);
+  assert.equal((await publicPage.goto('http://localhost:8088/')).status(), 200);
+  await capture(publicPage, 'landing');
+  await publicPage.setViewportSize({ width: 1440, height: 1000 });
+  await publicPage.screenshot({ path: `${out}/desktop.png`, fullPage: true });
+  await publicPage.setViewportSize({ width: 390, height: 844 });
+  await publicPage.screenshot({ path: `${out}/mobile.png`, fullPage: true });
+  await login(admin, 'http://localhost:8088', true);
+  await capture(admin, 'admin-empty');
+  for (const [route, name] of [['/admin/pesanan', 'orders-empty'], ['/admin/pengaturan', 'settings']]) {
+    assert.equal((await admin.goto('http://localhost:8088' + route)).status(), 200); await capture(admin, name);
+  }
+  for (const group of ['cabang', 'operator', 'aturan', 'integrasi']) {
+    await admin.locator(`[data-settings-link][href="#${group}"]`).click();
+    assert.equal(await admin.locator(`#${group}`).getAttribute('open'), '');
+    await capture(admin, `settings-${group}`, [1440, 390]);
+  }
+  await admin.setViewportSize({width:390,height:844});
+  await admin.getByRole('button',{name:'Buka menu admin'}).click();
+  assert.equal(await admin.locator('#admin-menu').evaluate(dialog=>dialog.open),true);
+  await capture(admin,'admin-menu',[390]);
+  await admin.keyboard.press('Tab');
+  assert.equal(await admin.evaluate(()=>!!document.activeElement.closest('#admin-menu')),true);
+  await admin.keyboard.press('Escape');
+  assert.equal(await admin.locator('#admin-menu').evaluate(dialog=>dialog.open),false);
+
+  const qa = 'http://localhost:8089';
+  await login(admin, qa);
+  await admin.goto(qa + '/admin/pengaturan');
+  const png = await admin.evaluate(() => {
+    const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 400;
+    const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 400, 400);
+    ctx.fillStyle = '#1C2E28'; ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('GAMBAR UJI', 200, 180); ctx.fillText('BUKAN QRIS', 200, 220);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  await admin.locator('#qris').setInputFiles({ name: 'fixture-bukan-qris.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await admin.locator('#merchant_name').fill('Merchant fixture UI — tidak dapat dibayar');
+  await admin.locator('#receiver_key').fill('UI-TEST-NON-PAYABLE');
+  await admin.locator('[name="merchant_checked"]').check();
+  await Promise.all([admin.waitForNavigation(), admin.getByRole('button', { name: 'Simpan QRIS untuk pesanan baru' }).click()]);
+  assert.equal(await admin.locator('[role="alert"]').count(), 0);
+  await admin.locator('#support_phone').fill('081234567899');
+  await Promise.all([admin.waitForNavigation(), admin.getByRole('button',{name:'Simpan kontak bantuan',exact:true}).click()]);
+  assert.equal(await admin.locator('.feedback-toast').filter({hasText:'Kontak bantuan disimpan.'}).isVisible(),true);
+  await capture(admin,'settings-toast',[1440,390]);
+  await admin.locator('[data-settings-link][href="#aturan"]').click();
+  await admin.locator('#aturan details summary').click();
+  await admin.locator('[name="policy_confirmed"]').check();
+  await admin.getByRole('button',{name:'Buat versi baru',exact:true}).click();
+  await admin.locator('#confirm-action').waitFor({state:'visible'});
+  await capture(admin,'policy-confirm',[1440,390]);
+  await admin.locator('[data-confirm-cancel]').click();
+  await admin.locator('[data-settings-link][href="#operator"]').click();
+  await admin.getByRole('button',{name:'Nonaktifkan Operator fixture tambahan',exact:true}).click();
+  await capture(admin,'operator-confirm',[1440,390]);
+  await admin.keyboard.press('Escape');
+  assert.equal(await admin.locator('#confirm-action').evaluate(dialog=>dialog.open),false);
+
+  const customer = await browser.newPage({ viewport: { width: 390, height: 844 } }); observe(customer);
+  await customer.goto(qa + '/?utm_campaign=fixture-ui');
+  await customer.getByRole('button',{name:/Lanjut bayar/}).click();
+  assert.equal(await customer.locator('#name').getAttribute('aria-invalid'),'true');
+  await customer.waitForFunction(()=>document.activeElement?.id==='name');
+  assert.equal(await customer.evaluate(()=>document.activeElement.id),'name');
+  await capture(customer,'checkout-errors',[1440,390]);
+  await customer.locator('#name').fill('Pelanggan fixture UI'); await customer.locator('#phone').fill('081234567890');
+  await customer.locator('[name="service_consent"]').check();
+  await Promise.all([customer.waitForURL(/\/pesanan\//), customer.getByRole('button', { name: /Lanjut bayar/ }).click()]);
+  const paymentUrl = customer.url();
+  await capture(customer, 'payment-fixture');
+  await Promise.all([customer.waitForNavigation(), customer.getByRole('button', { name: 'Saya sudah bayar' }).click()]);
+  assert.match(await customer.locator('body').innerText(), /Menunggu verifikasi/i);
+  await capture(customer, 'waiting-fixture');
+  await admin.goto(qa + '/admin/pesanan');
+  await capture(admin, 'orders-fixture');
+  await admin.route('**/livewire*/update*',route=>route.abort());
+  await admin.locator('#status').selectOption('MENUNGGU_PEMBAYARAN');
+  await admin.locator('#orders-network-error').waitFor({state:'visible'});
+  assert.equal(await admin.locator('[data-order-results]').getAttribute('inert'),'');
+  await capture(admin,'orders-request-failed',[1440,390]);
+  await admin.unroute('**/livewire*/update*');
+  await Promise.all([admin.waitForResponse(response=>new URL(response.url()).pathname.includes('/update')&&response.status()===200),admin.locator('[data-retry-orders]').click()]);
+  await admin.locator('#orders-network-error').waitFor({state:'hidden'});
+  await Promise.all([admin.waitForResponse(response=>new URL(response.url()).pathname.includes('/update')&&response.status()===200),admin.getByRole('button',{name:'Reset filter / lihat semua'}).click()]);
+  await admin.getByRole('link',{name:/Detail pesanan/}).first().waitFor();
+  await admin.getByRole('link', { name: /Detail pesanan/ }).first().click();
+  const orderUrl = admin.url();
+  await capture(admin, 'verification-fixture');
+  await admin.locator('#merchant_ref').fill('UI-TEST-RECEIPT');
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(Date.now() - 120000));
+  const date = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  await admin.locator('#paid_at').fill(`${date.year}-${date.month}-${date.day}T${date.hour}:${date.minute}:${date.second}`);
+  await admin.locator('#amount').fill('100000'); await admin.locator('[name="money_confirmed"]').check();
+  await admin.getByRole('button',{name:'Verifikasi uang masuk dan terbitkan voucher'}).click();
+  await admin.locator('#confirm-action').waitFor({state:'visible'});
+  assert.match(await admin.locator('#confirm-action').innerText(),/UI-TEST-RECEIPT/);
+  assert.equal(await admin.evaluate(()=>document.activeElement.hasAttribute('data-confirm-cancel')),true);
+  await capture(admin,'payment-confirm');
+  await admin.locator('[data-confirm-cancel]').click();
+  assert.equal(await admin.locator('#merchant_ref').inputValue(),'UI-TEST-RECEIPT');
+  await admin.getByRole('button',{name:'Verifikasi uang masuk dan terbitkan voucher'}).click();
+  await Promise.all([admin.waitForNavigation(),admin.locator('[data-confirm-accept]').click()]);
+  assert.equal(await admin.locator('[role="alert"]').count(), 0);
+  await customer.goto(paymentUrl);
+  await capture(customer, 'payment-paid', [1440,390]);
+  await customer.getByRole('link', { name: 'Buka voucher saya' }).click();
+  assert.equal(await customer.locator('[data-meta-pixel]').count(), 0);
+  await capture(customer, 'voucher-fixture');
+  await customer.evaluate(()=>{
+    let attempts=0;
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{if(++attempts===1)throw new Error('fixture denied');}}});
+  });
+  await customer.locator('[data-copy]').click();
+  assert.match(await customer.locator('#copy-status').innerText(),/Belum berhasil/);
+  await customer.locator('[data-copy]').click();
+  assert.equal(await customer.locator('#copy-status').innerText(),'');
+  assert.match(await customer.locator('#feedback').innerText(),/Kode voucher tersalin/);
+  await capture(customer,'copy-feedback',[1440,390]);
+  await admin.goto(orderUrl); await admin.getByRole('link', { name: 'Buka voucher / klaim' }).click();
+  await capture(admin, 'claim-preview-fixture');
+  await admin.locator('details').filter({has:admin.getByText('Pindahkan voucher sekali',{exact:true})}).locator('summary').click();
+  await capture(admin,'transfer-form',[1440,390]);
+  await admin.locator('#new_name').fill('Penerima fixture tanpa pemindahan');
+  await admin.locator('#new_phone').fill('081234567891');
+  await admin.locator('#approval_note').fill('Persetujuan sintetis untuk pemeriksaan dialog; tidak dipindahkan.');
+  await admin.locator('[name="owner_approved"]').check();
+  await admin.getByRole('button',{name:'Pindahkan dan siapkan link baru'}).click();
+  await capture(admin,'transfer-confirm',[1440,390]);
+  await admin.locator('[data-confirm-cancel]').click();
+  await admin.locator('details').filter({has:admin.getByText('Pindahkan voucher sekali',{exact:true})}).locator('summary').click();
+  await admin.locator('#branch_id').selectOption({ label: 'Cabang fixture UI' });
+  await admin.locator('#order_ref').fill('ORDER-UI-001');
+  await admin.locator('[name="eligibility_confirmed"]').check(); await admin.locator('[name="order_confirmed"]').check();
+  await admin.getByRole('button',{name:/Klaim potongan/}).click();
+  await admin.locator('#confirm-action').waitFor({state:'visible'});
+  assert.match(await admin.locator('#confirm-action').innerText(),/ORDER-UI-001/);
+  await capture(admin,'claim-confirm');
+  await admin.keyboard.press('Tab');
+  assert.equal(await admin.evaluate(()=>!!document.activeElement.closest('#confirm-action')),true);
+  await admin.locator('[data-confirm-cancel]').click();
+  await admin.getByRole('button',{name:/Klaim potongan/}).click();
+  await Promise.all([admin.waitForNavigation(),admin.locator('[data-confirm-accept]').click()]);
+  assert.match(await admin.locator('body').innerText(), /Potongan terkunci/);
+  await capture(admin, 'claim-success-fixture');
+  await customer.reload(); await capture(customer,'voucher-used',[1440,390]);
+  await admin.goto(orderUrl); await capture(admin,'order-paid');
+  const csrfPage = await browser.newPage(); observe(csrfPage);
+  const recoveryResponse = await csrfPage.request.post(paymentUrl+'/confirm',{form:{},headers:{'Sec-Fetch-Site':'cross-site'},maxRedirects:0});
+  assert.equal(recoveryResponse.status(),419);
+  const recoveryHtml = await recoveryResponse.text();
+  await csrfPage.route(paymentUrl,route=>route.fulfill({status:419,contentType:'text/html',body:recoveryHtml}),{times:1});
+  await csrfPage.goto(paymentUrl);
+  await csrfPage.getByRole('heading',{name:'Sesi formulir sudah berakhir.'}).waitFor();
+  await capture(csrfPage,'payment-recovery',[1440,390]);
+  await Promise.all([csrfPage.waitForNavigation(),csrfPage.getByRole('link',{name:'Periksa status pesanan'}).click()]);
+  assert.match(await csrfPage.locator('h1').innerText(),/Pembayaran terverifikasi/);
+  await admin.goto(qa+'/admin/pesanan');
+  await admin.evaluate(()=>{
+    window.BarcodeDetector=class{static async getSupportedFormats(){return ['qr_code'];}};
+    Object.defineProperty(navigator.mediaDevices,'getUserMedia',{configurable:true,value:()=>new Promise((resolve,reject)=>{window.rejectCamera=reject;})});
+  });
+  await admin.locator('[data-start-scanner]').click();
+  await admin.waitForFunction(()=>typeof window.rejectCamera==='function');
+  assert.equal(await admin.locator('[data-start-scanner]').isDisabled(),true);
+  await capture(admin,'scanner-pending',[1440,390]);
+  await admin.evaluate(()=>window.rejectCamera(new Error('fixture denied')));
+  await admin.waitForFunction(()=>document.getElementById('scanner-status').textContent.includes('izin ditolak'));
+  assert.equal(await admin.locator('[data-start-scanner]').isEnabled(),true);
+  await capture(admin,'scanner-denied',[1440,390]);
+  assert.equal((await publicPage.goto('http://localhost:8088/halaman-tidak-ada')).status(),404);
+  assert.match(await publicPage.locator('h1').innerText(), /Halaman tidak ditemukan/);
+  await capture(publicPage,'not-found');
+  await writeFile('.local/ui-state.json', JSON.stringify({ paymentUrl, orderUrl }, null, 2));
+  assert.deepEqual(errors, []);
+  await writeFile(`${out}/browser-report.json`, JSON.stringify({ reports, errors, fixture: 'All nonempty payment data is synthetic on port 8089. No real QRIS/payment/Meta/WA was used.' }, null, 2));
+  const groups = [...new Set(reports.map(r=>r.surface))];
+  for (const surface of groups) {
+    const entries = reports.filter(r=>r.surface===surface);
+    const gallery = await browser.newPage({ viewport:{width:1800,height:1000} });
+    const cards = await Promise.all(entries.map(async r=>{
+      const base64=(await readFile(`${out}/${r.surface}-${r.width}.png`)).toString('base64');
+      return `<figure><figcaption>${r.surface} / ${r.width}px</figcaption><img src="data:image/png;base64,${base64}"></figure>`;
+    }));
+    await gallery.setContent(`<html><style>body{margin:20px;font:16px system-ui;background:#e5e8e5}section{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}figure{margin:0;background:white;padding:10px}figcaption{padding-bottom:12px}img{width:100%;height:auto}</style><section>${cards.join('')}</section></html>`);
+    await gallery.evaluate(async()=>{await Promise.all([...document.images].map(img=>img.decode()));});
+    await gallery.screenshot({path:`${out}/gallery-${surface}.png`,fullPage:true}); await gallery.close();
+  }
+  console.log(`Browser QA passed: ${reports.length} viewport checks; fixture checkout → confirmation → approval → claim completed.`);
+} catch(error) {
+  console.error(String(error.stack || error).replace(/\b[a-f0-9]{64}\b/g,'[private]'));
+  process.exitCode=1;
+} finally { await browser.close(); }

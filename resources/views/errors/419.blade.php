@@ -1,0 +1,1 @@
+<x-error-page code="419" title="Sesi formulir sudah berakhir." message="Buka kembali halaman dan periksa status sebelum mengirim formulir ulang. Jangan membuat pesanan atau klaim baru jika tindakan sebelumnya sudah berhasil."/>
