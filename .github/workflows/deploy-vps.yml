@@ -63,5 +63,11 @@ jobs:
               docker compose --env-file .env.production -f compose.production.yml up -d postgres
               docker compose --env-file .env.production -f compose.production.yml run --rm app php artisan migrate --seed --force
               docker compose --env-file .env.production -f compose.production.yml up -d --force-recreate --wait --wait-timeout 90 app worker scheduler
+
+              built_image="$(docker image inspect --format '{{.Id}}' kgj-digital-voucher:production)"
+              app_id="$(docker compose --env-file .env.production -f compose.production.yml ps -q app)"
+              running_image="$(docker inspect --format '{{.Image}}' "$app_id")"
+              test "$running_image" = "$built_image"
+
               docker compose --env-file .env.production -f compose.production.yml ps
           REMOTE
