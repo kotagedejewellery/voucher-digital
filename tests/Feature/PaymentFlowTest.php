@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\VoucherPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PaymentFlowTest extends TestCase
@@ -57,6 +58,28 @@ class PaymentFlowTest extends TestCase
         $this->postJson($url.'/confirm',['note'=>'Sudah membayar'])->assertOk()->assertJsonPath('status','MENUNGGU_VERIFIKASI');
         $this->getJson($url)->assertOk()->assertJsonPath('voucher_url',null);
         $this->getJson('/pesanan/token-tidak-valid')->assertNotFound();
+    }
+
+    public function test_payment_page_explains_when_the_qris_image_is_unavailable(): void
+    {
+        $checkout=$this->postJson('/checkout',['name'=>'Pelanggan QRIS','phone'=>'081234567890','service_consent'=>true])->assertCreated();
+
+        $this->get($checkout->json('payment_url'))
+            ->assertOk()
+            ->assertSee('QRIS belum dapat ditampilkan.')
+            ->assertSee('Saya sudah membayar Rp100.000');
+    }
+
+    public function test_payment_page_groups_qris_merchant_nominal_and_next_steps(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('qris/test-only.png','test-image');
+        $checkout=$this->postJson('/checkout',['name'=>'Pelanggan QRIS','phone'=>'081234567890','service_consent'=>true])->assertCreated();
+
+        $this->get($checkout->json('payment_url'))
+            ->assertOk()
+            ->assertSeeInOrder(['Merchant test','Rp100.000','Pindai QRIS','Saya sudah membayar Rp100.000'])
+            ->assertDontSee('QRIS belum dapat ditampilkan.');
     }
 
     public function test_verified_money_issues_one_voucher_using_actual_payment_date(): void

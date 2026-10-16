@@ -67,7 +67,12 @@ class CheckoutController extends Controller
         if ($request->expectsJson()) {
             return response()->json(['reference'=>$order->reference,'status'=>$order->status,'price'=>$order->price,'voucher_url'=>$voucherUrl]);
         }
-        return view('payment',['order'=>$order,'voucherUrl'=>$voucherUrl,'support'=>Setting::read('support_phone')]);
+        return view('payment',[
+            'order'=>$order,
+            'voucherUrl'=>$voucherUrl,
+            'support'=>Setting::read('support_phone'),
+            'qrisAvailable'=>Storage::disk('local')->exists($order->qris->path),
+        ]);
     }
 
     public function confirm(Request $request, string $token)
