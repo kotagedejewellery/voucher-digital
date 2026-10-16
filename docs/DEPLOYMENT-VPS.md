@@ -83,7 +83,7 @@ Command membaca nama database dan user dari environment container PostgreSQL, se
 
 ## Deploy otomatis GitHub Actions
 
-Workflow [`.github/workflows/deploy-vps.yml`](../.github/workflows/deploy-vps.yml) berjalan saat ada push ke `main` atau ketika dijalankan manual dari tab Actions. Ia masuk sebagai user VPS yang sudah ada, memperbarui checkout pada `/opt/apps/sistem-voucher-digital/voucher-digital` dengan `git pull --ff-only`, build image, menjalankan migrasi dan seed idempoten, lalu menunggu `app`, `worker`, dan `scheduler` siap.
+Workflow [`.github/workflows/deploy-vps.yml`](../.github/workflows/deploy-vps.yml) berjalan saat ada push ke `main` atau ketika dijalankan manual dari tab Actions. Ia masuk sebagai user VPS yang sudah ada, memperbarui checkout pada `/opt/apps/sistem-voucher-digital/voucher-digital` dengan `git pull --ff-only`, lalu membangun image unik yang ditag dengan SHA commit tersebut. `app`, `worker`, dan `scheduler` direkreasi dari image itu, kemudian workflow membuktikan bahwa SHA di dalam setiap container dan ID image aktif sama dengan hasil build. Run hanya berstatus berhasil jika log memuat `Deployment synced:`.
 
 Tambahkan satu secret repository tambahan sebelum workflow pertama dijalankan:
 

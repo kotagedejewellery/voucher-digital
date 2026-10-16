@@ -1,7 +1,7 @@
 name: kgj-digital-voucher
 
 x-app: &app
-  image: kgj-digital-voucher:production
+  image: ${APP_IMAGE:-kgj-digital-voucher:production}
   build:
     context: .
     target: production
