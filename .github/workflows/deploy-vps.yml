@@ -53,21 +53,27 @@ jobs:
               git fetch --prune origin main
               git checkout main
               git pull --ff-only origin main
+              deploy_commit="$(git rev-parse HEAD)"
+              echo "Deploy commit: $deploy_commit"
 
               if ! test -f .env.production; then
                 echo 'Deployment awal belum siap: buat .env.production dari .env.production.example di VPS.' >&2
                 exit 1
               fi
 
-              docker compose --env-file .env.production -f compose.production.yml build
+              DEPLOY_COMMIT="$deploy_commit" docker compose --env-file .env.production -f compose.production.yml build app
               docker compose --env-file .env.production -f compose.production.yml up -d postgres
               docker compose --env-file .env.production -f compose.production.yml run --rm app php artisan migrate --seed --force
-              docker compose --env-file .env.production -f compose.production.yml up -d --force-recreate --wait --wait-timeout 90 app worker scheduler
+              docker compose --env-file .env.production -f compose.production.yml rm -sf app worker scheduler
+              docker compose --env-file .env.production -f compose.production.yml up -d --wait --wait-timeout 90 app worker scheduler
 
               built_image="$(docker image inspect --format '{{.Id}}' kgj-digital-voucher:production)"
               app_id="$(docker compose --env-file .env.production -f compose.production.yml ps -q app)"
               running_image="$(docker inspect --format '{{.Image}}' "$app_id")"
+              running_commit="$(docker compose --env-file .env.production -f compose.production.yml exec -T app cat /var/www/html/.deployment-commit)"
               test "$running_image" = "$built_image"
+              test "$running_commit" = "$deploy_commit"
+              printf 'Deployment synced: commit=%s image=%s\n' "$running_commit" "$running_image"
 
               docker compose --env-file .env.production -f compose.production.yml ps
           REMOTE

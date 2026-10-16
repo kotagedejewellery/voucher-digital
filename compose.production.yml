@@ -5,6 +5,8 @@ x-app: &app
   build:
     context: .
     target: production
+    args:
+      DEPLOY_COMMIT: ${DEPLOY_COMMIT:-unknown}
   env_file:
     - .env.production
   environment:

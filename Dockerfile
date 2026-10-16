@@ -25,11 +25,15 @@ COPY vite.config.js ./
 RUN npm run build
 
 FROM base AS production
+ARG DEPLOY_COMMIT=unknown
+LABEL org.opencontainers.image.revision=$DEPLOY_COMMIT
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts --optimize-autoloader
 COPY . .
 COPY --from=assets /build/public/build public/build
-RUN composer dump-autoload --no-dev --optimize && chown -R www-data:www-data storage bootstrap/cache
+RUN printf '%s\n' "$DEPLOY_COMMIT" > .deployment-commit \
+    && composer dump-autoload --no-dev --optimize \
+    && chown -R www-data:www-data storage bootstrap/cache
 COPY docker/php.ini /usr/local/etc/php/conf.d/voucher.ini
 COPY docker/entrypoint.sh /usr/local/bin/voucher-entrypoint
 RUN chmod +x /usr/local/bin/voucher-entrypoint
