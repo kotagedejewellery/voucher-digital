@@ -44,6 +44,16 @@ class AdminAccessTest extends TestCase
         $this->get('/admin')->assertRedirect('/admin/login');
     }
 
+    public function test_admin_lookup_keeps_manual_and_camera_voucher_entry(): void
+    {
+        $this->withoutVite();
+        $this->actingAs(User::factory()->create())->get('/admin')->assertOk()
+            ->assertSee('id="code"', false)
+            ->assertSee('data-start-scanner', false)
+            ->assertSee('data-scan-preview', false)
+            ->assertSee('aria-label="Pratinjau kamera pemindai voucher"', false);
+    }
+
     public function test_deactivated_operator_loses_access_on_the_next_request(): void
     {
         $admin=User::factory()->create(); $operator=User::factory()->create();
