@@ -200,8 +200,8 @@ if (settingsGroups.length) {
     selectSettings(location.hash.slice(1) || settingsGroups.find(group => group.open)?.id || settingsGroups[0].id);
     window.addEventListener('hashchange', () => selectSettings(location.hash.slice(1)));
 }
-const connectOrders = () => {
-    const notice = document.getElementById('orders-network-error'); if (!notice) return;
+const connectListRecovery = (noticeId, retrySelector) => {
+    const notice = document.getElementById(noticeId); if (!notice) return;
     const stale = () => {
         notice.hidden = false;
         document.querySelector('[data-order-results]')?.setAttribute('inert', '');
@@ -217,9 +217,13 @@ const connectOrders = () => {
         });
         onSuccess(() => { notice.hidden = true; document.querySelector('[data-order-results]')?.removeAttribute('inert'); });
     });
-    notice.querySelector('[data-retry-orders]').addEventListener('click', () => window.Livewire.all()[0]?.$wire.$refresh());
+    notice.querySelector(retrySelector)?.addEventListener('click', () => window.Livewire.all()[0]?.$wire.$refresh());
 };
-if (window.Livewire) connectOrders(); else document.addEventListener('livewire:init', connectOrders, { once: true });
+const connectListRecoveries = () => {
+    connectListRecovery('orders-network-error', '[data-retry-orders]');
+    connectListRecovery('voucher-history-network-error', '[data-retry-voucher-history]');
+};
+if (window.Livewire) connectListRecoveries(); else document.addEventListener('livewire:init', connectListRecoveries, { once: true });
 
 const tracking = document.querySelector('[data-meta-pixel]');
 if (tracking && /^\d+$/.test(tracking.dataset.metaPixel)) {

@@ -27,6 +27,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {
     Route::view('/pesanan','admin.orders')->name('admin.orders');
     Route::get('/pesanan/{order:reference}',[AdminController::class,'order'])->name('admin.order');
     Route::get('/voucher',[AdminController::class,'voucher'])->name('admin.voucher');
+    Route::view('/riwayat-voucher','admin.voucher-history')->name('admin.voucher-history');
     Route::get('/pengaturan',[AdminController::class,'settings'])->name('admin.settings');
     Route::post('/pengaturan/qris',[SettingsController::class,'qris'])->name('admin.qris');
     Route::post('/pengaturan/branch',[SettingsController::class,'branch'])->name('admin.branch');

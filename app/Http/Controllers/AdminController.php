@@ -28,7 +28,12 @@ class AdminController extends Controller
     }
     public function voucher(Request $request)
     {
-        $data=$request->validate(['code'=>'required|string|max:300']);
+        $data=$request->validate([
+            'code'=>'required|string|max:300', 'from_history'=>'nullable|boolean',
+            'history_search'=>'nullable|string|max:150', 'history_lifecycle'=>'nullable|in:,AKTIF,TERPAKAI,KEDALUWARSA',
+            'history_paid_from'=>'nullable|date_format:Y-m-d|before_or_equal:history_paid_to',
+            'history_paid_to'=>'nullable|date_format:Y-m-d|after_or_equal:history_paid_from',
+        ]);
         $input=trim($data['code']);
         if (preg_match('/^[a-f0-9]{64}$/D',$input)) { $hash=hash('sha256',$input); }
         elseif (preg_match('~/v/([a-f0-9]{64})$~D',$input,$match)) { $hash=hash('sha256',$match[1]); }
@@ -38,7 +43,12 @@ class AdminController extends Controller
         if (!$voucher->scanned_at) { $voucher->update(['scanned_at'=>now()]); }
         $quote=$voucher->quote();
         if ($request->expectsJson()) { return response()->json(['code'=>$voucher->code,'status'=>$quote['status'],'age'=>$quote['age'],'discount'=>$quote['discount'],'quote'=>$quote['key']]); }
-        return view('admin.voucher',['voucher'=>$voucher,'quote'=>$quote,'branches'=>Branch::where('active',true)->get(['id','name']), 'requestKey'=>old('request_key',(string)Str::uuid()),'waRequestKey'=>old('request_key',(string)Str::uuid())]);
+        $fromHistory=$request->boolean('from_history');
+        $backUrl=$fromHistory ? route('admin.voucher-history',array_filter([
+            'search'=>$data['history_search']??'', 'lifecycle'=>$data['history_lifecycle']??'',
+            'paid_from'=>$data['history_paid_from']??'', 'paid_to'=>$data['history_paid_to']??'',
+        ],fn ($value) => $value!=='')) : route('admin.order',$voucher->order->reference);
+        return view('admin.voucher',['voucher'=>$voucher,'quote'=>$quote,'branches'=>Branch::where('active',true)->get(['id','name']), 'requestKey'=>old('request_key',(string)Str::uuid()),'waRequestKey'=>old('request_key',(string)Str::uuid()),'backUrl'=>$backUrl,'backLabel'=>$fromHistory?'Riwayat Voucher':'Detail pesanan '.$voucher->order->reference]);
     }
     public function settings()
     {
