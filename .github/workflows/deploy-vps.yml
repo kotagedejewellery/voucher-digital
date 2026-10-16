@@ -65,7 +65,7 @@ jobs:
 
               docker compose --env-file .env.production -f compose.production.yml build app
               docker compose --env-file .env.production -f compose.production.yml up -d postgres
-              docker compose --env-file .env.production -f compose.production.yml run --rm app php artisan migrate --seed --force
+              docker compose --env-file .env.production -f compose.production.yml run --rm --no-TTY --interactive=false app php artisan migrate --seed --force
               docker compose --env-file .env.production -f compose.production.yml up -d --force-recreate --wait --wait-timeout 90 app worker scheduler
 
               built_image="$(docker image inspect --format '{{.Id}}' "$APP_IMAGE")"
