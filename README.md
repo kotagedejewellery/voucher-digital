@@ -37,7 +37,7 @@ Sesudah mengubah source, rebuild app dan jalankan `docker compose up -d app work
 
 ## Navigasi panel
 
-Ringkasan menampilkan antrean verifikasi dan pencarian/scan voucher. Pesanan & Voucher menyediakan pencarian, filter, pagination dan ekspor; daftar berbentuk tabel pada desktop dan kartu pada mobile. Pengaturan dibagi menjadi Pembayaran, Cabang, Operator, Aturan voucher dan Integrasi; buka bagian yang diperlukan. Desktop memakai sidebar tetap, mobile/tablet memakai tombol menu pada header.
+Ringkasan menampilkan antrean verifikasi, ringkasan campaign, dan pencarian/scan voucher. Pesanan & Voucher menyediakan pencarian, filter, pagination dan ekspor; daftar berbentuk tabel pada desktop dan kartu pada mobile. Antrean verifikasi diurutkan dari konfirmasi customer paling awal; data lama yang belum memiliki waktu konfirmasi memakai waktu dibuat sebagai fallback. Detail pesanan menyimpan riwayat tindakan operator yang terkait. Pengaturan dibagi menjadi Pembayaran, Cabang, Operator, Aturan voucher dan Integrasi; buka bagian yang diperlukan. Desktop memakai sidebar tetap, mobile/tablet memakai tombol menu pada header.
 
 ## Alur operator
 
@@ -74,7 +74,7 @@ WACO_SENDER=
 
 Atur `APP_URL` ke domain **HTTPS** yang dapat dibuka customer, kemudian recreate app/worker/scheduler. Localhost bukan tujuan link untuk customer. Tanpa konfigurasi lengkap job WA menjadi SKIPPED, kontrol otomatis disabled dan tindakan manual tetap tersedia. Setelah konfigurasi, approval/transfer mengantrekan link pemilik saat ini; operator dapat mengirim ulang dari halaman voucher setelah memeriksa riwayat WACO. Token/code/revision lama tidak dikirim ulang. Klik ulang dengan request key sama tidak membuat antrean baru.
 
-HTTP 200 dengan `status=terkirim` menjadi SENT; `message_id`, bila tersedia, disimpan terenkripsi pada delivery. Ini belum membuktikan delivered/read; webhook belum termasuk implementasi. Retry otomatis hanya untuk HTTP429, jeda60/120/600detik, maksimal4percobaan. Penolakan yang jelas menjadi FAILED. Timeout, respons tidak dikenal atau job terputus setelah mulai mengirim menjadi UNCERTAIN: **periksa riwayat WACO dahulu**, lalu antrekan ulang bila diperlukan. Provider tidak mendokumentasikan idempotency outgoing, sehingga pengiriman tepat sekali tidak dijanjikan. [Riset dan batas kontrak](docs/research/WACO-API.md).
+HTTP 200 dengan `status=terkirim` menjadi SENT; `message_id`, bila tersedia, disimpan terenkripsi pada delivery. Ini belum membuktikan delivered/read; webhook belum termasuk implementasi. Retry otomatis hanya untuk HTTP429, jeda60/120/600detik, maksimal4percobaan. Penolakan yang jelas menjadi FAILED. Timeout, respons tidak dikenal atau job terputus setelah mulai mengirim menjadi UNCERTAIN: **periksa riwayat WACO dahulu**, lalu antrekan ulang bila diperlukan. Jika WACO aktif tetapi delivery FAILED atau UNCERTAIN, admin juga dapat mengirim link dari WhatsApp manual dan mencatat tindakannya. Dashboard dan riwayat voucher memisahkan perhatian WhatsApp dari tracking Meta; perhatian hanya tertutup setelah operator memberi catatan pemeriksaan. Provider tidak mendokumentasikan idempotency outgoing, sehingga pengiriman tepat sekali tidak dijanjikan. [Riset dan batas kontrak](docs/research/WACO-API.md).
 
 Sesuai pilihan pengguna, pengujian tetap pada pembayaran/klaim/hak akses; tidak ditambahkan pengujian HTTP tiruan WACO. Uji template dan penerimaan nyata masih diperlukan sebelum mengaktifkan pengiriman untuk customer.
 

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {
     Route::post('/vouchers/{code}/claim',[ClaimController::class,'claim'])->name('admin.claim');
     Route::post('/vouchers/{code}/transfer',[ClaimController::class,'transfer'])->name('admin.transfer');
     Route::post('/deliveries/{delivery}/retry',[DeliveryController::class,'retry'])->name('admin.retry');
+    Route::post('/deliveries/{delivery}/resolve',[DeliveryController::class,'resolve'])->name('admin.resolve-delivery');
     Route::post('/vouchers/{voucher}/resend',[DeliveryController::class,'resend'])->middleware('throttle:6,1')->name('admin.resend');
     Route::post('/vouchers/{voucher}/manual-delivery',[DeliveryController::class,'markManual'])->name('admin.mark-manual-delivery');
     Route::post('/pesanan/{order:reference}/support',[DeliveryController::class,'support'])->name('admin.support-case');

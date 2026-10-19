@@ -7,6 +7,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB,Queue};
 class DeliveryController extends Controller
 {
+    public function resolve(Request $request,Delivery $delivery,VoucherActions $actions)
+    {
+        $data=$request->validate(['resolution_note'=>'required|string|max:500']);
+        $reference=DB::transaction(function () use ($request,$delivery,$actions,$data) {
+            $actions->activeActor($request->user());
+            $delivery=Delivery::with('voucher.order')->lockForUpdate()->findOrFail($delivery->id);
+            abort_unless(Delivery::needsAttention()->whereKey($delivery->id)->exists(),422,'Pengiriman ini tidak lagi memerlukan pemeriksaan.');
+            $delivery->update(['resolved_at'=>now(),'resolved_by'=>$request->user()->id,'resolution_note'=>trim($data['resolution_note'])]);
+            $actions->audit($request->user(),'delivery.resolved','delivery',$delivery->id);
+            return $delivery->voucher->order->reference;
+        });
+        return redirect()->route('admin.order',$reference)->with('success','Catatan pemeriksaan pengiriman disimpan.');
+    }
+
     public function retry(Request $request,Delivery $delivery,VoucherActions $actions)
     {
         DB::transaction(function () use ($request,$delivery,$actions) {
@@ -49,13 +63,13 @@ class DeliveryController extends Controller
         $request->validate(['send_confirmed'=>'accepted']);
         DB::transaction(function () use ($request,$voucher,$actions) {
             $actions->activeActor($request->user());
-            abort_if(config('voucher.waco.ready'),422,'WACO sudah aktif. Gunakan pengiriman otomatis atau kirim ulang WACO.');
             $voucher=Voucher::lockForUpdate()->findOrFail($voucher->id);
             abort_if($voucher->anonymized_at || !$voucher->phone,422,'Data pemilik tidak tersedia.');
+            $states=config('voucher.waco.ready')?['FAILED','UNCERTAIN']:['PENDING','SKIPPED'];
             $delivery=Delivery::lockForUpdate()->where('voucher_id',$voucher->id)->where('kind','WhatsApp')
-                ->where('revision',$voucher->revision)->whereIn('status',['PENDING','SKIPPED'])->latest('id')->first();
+                ->where('revision',$voucher->revision)->whereIn('status',$states)->latest('id')->first();
             abort_unless($delivery,422,'Pengiriman manual tidak lagi diperlukan untuk voucher ini.');
-            $delivery->update(['status'=>'MANUAL_SENT','sent_at'=>now(),'last_error'=>'Link dikirim manual oleh operator.']);
+            $delivery->update(['status'=>'MANUAL_SENT','sent_at'=>now(),'last_error'=>config('voucher.waco.ready')?'WACO gagal; link dikirim manual oleh operator.':'Link dikirim manual oleh operator.']);
             $actions->audit($request->user(),'delivery.manual_sent','delivery',$delivery->id);
         });
         return redirect()->route('admin.voucher',['code'=>$voucher->fresh()->code])->with('success','Pengiriman WhatsApp manual dicatat. Status ini tidak membuktikan pesan telah dibaca pelanggan.');

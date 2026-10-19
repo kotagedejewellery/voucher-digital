@@ -47,7 +47,10 @@ class VoucherHistory extends Component
             ->join('payment_orders','payment_orders.id','=','vouchers.payment_order_id')
             ->join('voucher_policies','voucher_policies.id','=','payment_orders.policy_id')
             ->with(['order.policy','redemption.branch','redemption.actor'])
-            ->withCount(['deliveries as delivery_attention_count'=>fn($q)=>$q->needsAttention()]);
+            ->withCount([
+                'deliveries as whatsapp_delivery_attention_count'=>fn($q)=>$q->needsAttention()->where('kind','WhatsApp'),
+                'deliveries as meta_delivery_attention_count'=>fn($q)=>$q->needsAttention()->where('kind','!=','WhatsApp'),
+            ]);
 
         if ($this->search!=='') {
             $term=trim($this->search);

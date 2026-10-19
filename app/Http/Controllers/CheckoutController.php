@@ -81,7 +81,7 @@ class CheckoutController extends Controller
         $order=DB::transaction(function () use ($token,$data) {
             $order=PaymentOrder::where('token_hash',hash('sha256',$token))->lockForUpdate()->firstOrFail();
             if ($order->status!=='PAID') {
-                $order->update(['status'=>'MENUNGGU_VERIFIKASI','customer_note'=>$data['note']??null,'correction_reason'=>null]);
+                $order->update(['status'=>'MENUNGGU_VERIFIKASI','customer_note'=>$data['note']??null,'customer_confirmed_at'=>$order->customer_confirmed_at??now(),'correction_reason'=>null]);
             }
             return $order;
         });

@@ -8,7 +8,7 @@ class PaymentOrder extends Model {
     protected function casts(): array { return [
         'customer_name'=>'encrypted','phone'=>'encrypted','access_token'=>'encrypted','customer_note'=>'encrypted','correction_reason'=>'encrypted',
         'tracking'=>'encrypted:array','marketing_consent'=>'boolean','support_open'=>'boolean','paid_at'=>'immutable_datetime',
-        'verified_at'=>'immutable_datetime','anonymized_at'=>'immutable_datetime','wedding_date'=>'date',
+        'verified_at'=>'immutable_datetime','customer_confirmed_at'=>'immutable_datetime','anonymized_at'=>'immutable_datetime','wedding_date'=>'date',
     ]; }
     public function voucher() { return $this->hasOne(Voucher::class); }
     public function policy() { return $this->belongsTo(VoucherPolicy::class); }

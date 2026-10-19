@@ -64,7 +64,7 @@ class AccessAndUploadTest extends TestCase
         $stalledDelivery->update(['updated_at'=>now()->subMinutes(31)]);
         $expired=$makeVoucher('VS-HISTORY-EXPIRED','HISTORYEX',366);
 
-        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Pengiriman perlu diperiksa')->assertSee('>3</a>',false)->assertSee(route('admin.voucher-history',['lifecycle'=>'PERLU_DIPERIKSA']),false);
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Pesan WhatsApp perlu diperiksa')->assertSee('Tracking Meta perlu diperiksa')->assertSee(route('admin.voucher-history',['lifecycle'=>'PERLU_DIPERIKSA']),false);
         $this->actingAs($admin)->get('/admin/riwayat-voucher')->assertOk()->assertSee($active->code)->assertSee($used->code)->assertSee($expired->code)->assertSee('>Dari</span>',false)->assertSee('>Sampai</span>',false)->assertSee(route('admin.order',$used->order->reference).'#pengiriman',false);
         $this->actingAs($admin)->get(route('admin.order',$used->order->reference))->assertOk()->assertSee('id="pengiriman"',false);
         $this->actingAs($admin)->get(route('admin.order',$active->order->reference))->assertOk()->assertSee(route('admin.voucher',['code'=>$active->code]),false);
@@ -83,6 +83,14 @@ class AccessAndUploadTest extends TestCase
         Delivery::create(['voucher_id'=>$active->id,'kind'=>'WhatsApp','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'PENDING']);
         $this->actingAs($admin)->post(route('admin.mark-manual-delivery',$active),['send_confirmed'=>true])->assertRedirect(route('admin.voucher',['code'=>$active->code]));
         $this->actingAs($admin)->get(route('admin.order',$active->order->reference))->assertOk()->assertSee('Dikirim manual');
+
+        $wacoFailure=$makeVoucher('VS-WACO-FALLBACK','WACOFALLBK',2);
+        $wacoFailure->update(['owner_name'=>'Customer WACO','phone'=>'+6281200000002']);
+        Delivery::create(['voucher_id'=>$wacoFailure->id,'kind'=>'WhatsApp','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'FAILED','last_error'=>'Template WACO ditolak']);
+        config(['voucher.waco.ready'=>true]);
+        $this->actingAs($admin)->get(route('admin.voucher',['code'=>$wacoFailure->code]))->assertOk()->assertSee('Tandai link telah dikirim');
+        $this->actingAs($admin)->post(route('admin.mark-manual-delivery',$wacoFailure),['send_confirmed'=>true])->assertRedirect(route('admin.voucher',['code'=>$wacoFailure->code]));
+        $this->actingAs($admin)->get(route('admin.order',$wacoFailure->order->reference))->assertOk()->assertSee('Dikirim manual');
     }
 
     public function test_landing_can_be_read_repeatedly_from_the_database_cache(): void
@@ -91,5 +99,21 @@ class AccessAndUploadTest extends TestCase
         \App\Models\Branch::create(['name'=>'Cabang fixture cache','address'=>'Alamat sintetis']);
         $this->get('/')->assertOk()->assertSee('Cabang fixture cache');
         $this->get('/')->assertOk()->assertSee('Cabang fixture cache');
+    }
+
+    public function test_delivery_attention_separates_customer_messages_and_meta_tracking(): void
+    {
+        $this->withoutVite(); $this->seed(); $admin=User::factory()->create();
+        $policy=VoucherPolicy::current();
+        $qris=QrisAsset::create(['path'=>'qris/attention.png','mime'=>'image/png','merchant_name'=>'KGJ','receiver_key'=>'KGJ-ATTENTION','uploaded_by'=>$admin->id]);
+        $order=PaymentOrder::create(['reference'=>'VS-ATTENTION','token_hash'=>hash('sha256','attention'),'access_token'=>str_repeat('a',64),'marketing_consent'=>true,'service_consented_at'=>now(),'policy_id'=>$policy->id,'qris_asset_id'=>$qris->id,'price'=>100000,'receiver_key'=>'KGJ-ATTENTION','status'=>'PAID','paid_at'=>now(),'verified_at'=>now(),'verified_by'=>$admin->id]);
+        $voucher=Voucher::create(['payment_order_id'=>$order->id,'code'=>'ATTENTION1','token_hash'=>hash('sha256','attention-voucher'),'access_token'=>str_repeat('b',64),'marketing_consent'=>true]);
+        $whatsapp=Delivery::create(['voucher_id'=>$voucher->id,'kind'=>'WhatsApp','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'FAILED','last_error'=>'Template ditolak']);
+        Delivery::create(['voucher_id'=>$voucher->id,'kind'=>'Purchase','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'FAILED','last_error'=>'Meta ditolak']);
+
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Pesan WhatsApp perlu diperiksa')->assertSee('Tracking Meta perlu diperiksa');
+        $this->actingAs($admin)->get('/admin/riwayat-voucher?lifecycle=PERLU_DIPERIKSA')->assertOk()->assertSee('WhatsApp perlu diperiksa (1)')->assertSee('Meta perlu diperiksa (1)');
+        $this->actingAs($admin)->post(route('admin.resolve-delivery',$whatsapp),['resolution_note'=>'Riwayat WACO sudah diperiksa.'])->assertRedirect(route('admin.order',$order->reference));
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Pesan WhatsApp perlu diperiksa')->assertSee('>0</a>',false)->assertSee('Tracking Meta perlu diperiksa')->assertSee('>1</a>',false);
     }
 }

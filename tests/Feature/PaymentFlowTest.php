@@ -2,6 +2,7 @@
 namespace Tests\Feature;
 
 use App\Models\QrisAsset;
+use App\Models\PaymentOrder;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\VoucherPolicy;
@@ -60,6 +61,28 @@ class PaymentFlowTest extends TestCase
         $this->getJson('/pesanan/token-tidak-valid')->assertNotFound();
     }
 
+    public function test_pending_verification_queue_prioritizes_the_first_customer_confirmation(): void
+    {
+        $first=$this->postJson('/checkout',['name'=>'Pelanggan pertama','phone'=>'081234567890','service_consent'=>true])->assertCreated();
+        $this->travel(1)->minutes();
+        $second=$this->postJson('/checkout',['name'=>'Pelanggan kedua','phone'=>'081234567891','service_consent'=>true])->assertCreated();
+
+        $this->postJson($first->json('payment_url').'/confirm')->assertOk();
+        $this->travel(1)->minutes();
+        $this->postJson($second->json('payment_url').'/confirm')->assertOk();
+
+        $firstOrder=PaymentOrder::where('reference',$first->json('reference'))->firstOrFail();
+        $secondOrder=PaymentOrder::where('reference',$second->json('reference'))->firstOrFail();
+        $this->assertNotNull($firstOrder->customer_confirmed_at);
+        $this->assertNotNull($secondOrder->customer_confirmed_at);
+
+        $page=$this->actingAs(User::first())->get('/admin/pesanan')->assertOk();
+        $this->assertLessThan(
+            strpos($page->getContent(),'<strong class="order-ref">'.$secondOrder->reference),
+            strpos($page->getContent(),'<strong class="order-ref">'.$firstOrder->reference),
+        );
+    }
+
     public function test_payment_page_explains_when_the_qris_image_is_unavailable(): void
     {
         $checkout=$this->postJson('/checkout',['name'=>'Pelanggan QRIS','phone'=>'081234567890','service_consent'=>true])->assertCreated();
@@ -97,6 +120,19 @@ class PaymentFlowTest extends TestCase
         $second=$this->postJson('/checkout',['name'=>'Pelanggan kedua','phone'=>'081234567891','service_consent'=>true])->assertCreated();
         $this->postJson('/admin/pesanan/'.$second->json('reference').'/approve',$data)->assertUnprocessable();
         $this->getJson($second->json('payment_url'))->assertJsonPath('voucher_url',null);
+    }
+
+    public function test_admin_can_see_campaign_progress_and_the_operator_audit_for_an_order(): void
+    {
+        $checkout=$this->postJson('/checkout',['name'=>'Pelanggan campaign','phone'=>'081234567890','service_consent'=>true,'utm_campaign'=>'IG-Oct'])->assertCreated();
+        $admin=User::first();
+        $this->actingAs($admin)->postJson('/admin/pesanan/'.$checkout->json('reference').'/approve',[
+            'merchant_ref'=>'CAMPAIGN-IG-OCT','paid_at'=>now('Asia/Jakarta')->format('Y-m-d\\TH:i:s'),'amount'=>100000,'money_confirmed'=>true,
+        ])->assertOk();
+
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Kinerja campaign')->assertSee('IG-Oct');
+        $this->actingAs($admin)->get('/admin/pesanan/'.$checkout->json('reference'))->assertOk()
+            ->assertSee('Riwayat tindakan operator')->assertSee('Pembayaran diverifikasi');
     }
 
     public function test_claim_locks_discount_once_and_retry_recovers_the_same_result(): void

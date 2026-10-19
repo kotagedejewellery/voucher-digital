@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Branch,Delivery,PaymentOrder,QrisAsset,Redemption,Setting,Voucher,VoucherPolicy};
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -13,18 +14,38 @@ class AdminController extends Controller
             'counts'=>PaymentOrder::selectRaw("count(*) as checkout, count(*) filter (where status = 'MENUNGGU_VERIFIKASI') as pending, count(*) filter (where status = 'PAID') as paid, coalesce(sum(price) filter (where status = 'PAID'),0) as revenue")->first(),
             'claims'=>Redemption::count(),'viewed'=>Voucher::whereNotNull('viewed_at')->count(),'scanned'=>Voucher::whereNotNull('scanned_at')->count(),
             'qris'=>QrisAsset::find(Setting::read('qris_id')),'branches'=>Branch::where('active',true)->count(),
-            'deliveryAttention'=>Delivery::needsAttention()->count(),
+            'whatsappDeliveryAttention'=>Delivery::needsAttention()->where('kind','WhatsApp')->count(),
+            'metaDeliveryAttention'=>Delivery::needsAttention()->where('kind','!=','WhatsApp')->count(),
+            'campaigns'=>PaymentOrder::query()->whereNotNull('campaign')->where('campaign','!=','')
+                ->leftJoin('vouchers','vouchers.payment_order_id','=','payment_orders.id')
+                ->leftJoin('redemptions','redemptions.voucher_id','=','vouchers.id')
+                ->selectRaw("campaign, count(*) as checkouts, count(*) filter (where payment_orders.status = 'PAID') as paid, count(redemptions.id) as claims")
+                ->groupBy('campaign')->orderByDesc('checkouts')->limit(5)->get(),
         ]);
     }
     public function order(Request $request,PaymentOrder $order)
     {
-        $order->load(['qris','policy','voucher.order.policy','voucher.deliveries','voucher.redemption.branch','voucher.redemption.actor','voucher.transfer']);
+        $order->load(['qris','policy','voucher.order.policy','voucher.deliveries.resolvedBy','voucher.redemption.branch','voucher.redemption.actor','voucher.transfer']);
+        $deliveryIds=$order->voucher?->deliveries->pluck('id')??collect();
+        $audit=DB::table('audit_logs as audit')->leftJoin('users as actor','actor.id','=','audit.actor_id')
+            ->where(function ($query) use ($order,$deliveryIds) {
+                $query->where(fn ($q) => $q->where('audit.subject_type','payment')->where('audit.subject_id',$order->id));
+                if ($order->voucher) { $query->orWhere(fn ($q) => $q->where('audit.subject_type','voucher')->where('audit.subject_id',$order->voucher->id)); }
+                if ($deliveryIds->isNotEmpty()) { $query->orWhere(fn ($q) => $q->where('audit.subject_type','delivery')->whereIn('audit.subject_id',$deliveryIds)); }
+            })->orderByDesc('audit.created_at')->limit(10)
+            ->get(['audit.action','audit.created_at','actor.name as actor_name'])
+            ->map(fn ($entry) => (object)[...((array)$entry),'at'=>\Carbon\CarbonImmutable::parse($entry->created_at)->setTimezone('Asia/Jakarta')->format('d/m/Y H:i'),'label'=>match ($entry->action) {
+                'payment.approved'=>'Pembayaran diverifikasi','payment.correction'=>'Perbaikan pembayaran diminta','voucher.claimed'=>'Voucher diklaim',
+                'voucher.transferred'=>'Pemilik voucher dipindahkan','delivery.retry'=>'Pengiriman diantrekan ulang','delivery.resolved'=>'Perhatian pengiriman ditutup',
+                'whatsapp.resend'=>'WhatsApp diantrekan ulang','delivery.manual_sent'=>'Pengiriman WhatsApp manual dicatat','support.status'=>'Status bantuan diperbarui',
+                default=>$entry->action,
+            }]);
         if ($request->expectsJson()) {
             return response()->json(['reference'=>$order->reference,'status'=>$order->status,'voucher_code'=>$order->voucher?->code,
                 'paid_at'=>$order->paid_at?->toIso8601String(),'verified_at'=>$order->verified_at?->toIso8601String(),
                 'deliveries'=>$order->voucher?->deliveries->map(fn($d)=>['id'=>$d->id,'kind'=>$d->kind,'status'=>$d->status,'event_id'=>$d->event_id])??[]]);
         }
-        return view('admin.order',['order'=>$order]);
+        return view('admin.order',['order'=>$order,'audit'=>$audit]);
     }
     public function voucher(Request $request)
     {

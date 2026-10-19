@@ -37,7 +37,9 @@ class Orders extends Component
             $term=trim($this->search);
             $query->where(fn($q)=>$q->where('reference',$term)->orWhere('merchant_ref',$term)->orWhere('campaign',$term)->orWhereHas('voucher',fn($v)=>$v->where('code',strtoupper($term))));
         }
-        return view('livewire.orders',['orders'=>$query->latest('id')->paginate(20),
+        if ($this->status==='MENUNGGU_VERIFIKASI') { $query->orderByRaw('customer_confirmed_at asc nulls last')->orderBy('id'); }
+        else { $query->latest('id'); }
+        return view('livewire.orders',['orders'=>$query->paginate(20),
             'exports'=>Export::where('user_id',auth()->id())->where('expires_at','>',now())->latest('id')->limit(5)->get()]);
     }
 }
