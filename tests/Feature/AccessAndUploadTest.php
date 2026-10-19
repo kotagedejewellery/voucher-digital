@@ -58,11 +58,31 @@ class AccessAndUploadTest extends TestCase
         $used=$makeVoucher('VS-HISTORY-USED','HISTORYUSED',10); $used->update(['status'=>'TERPAKAI']);
         Redemption::create(['voucher_id'=>$used->id,'branch_id'=>$branch->id,'order_ref'=>'ORDER-HISTORY','actor_id'=>$admin->id,'request_key'=>fake()->uuid(),'request_digest'=>hash('sha256','used'),'discount'=>800000,'age_days'=>10,'claimed_at'=>now()]);
         Delivery::create(['voucher_id'=>$used->id,'kind'=>'WhatsApp','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'FAILED','last_error'=>'Fixture failure']);
+        Delivery::create(['voucher_id'=>$active->id,'kind'=>'WhatsApp','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'UNCERTAIN','last_error'=>'Fixture uncertain']);
+        $stalled=$makeVoucher('VS-HISTORY-STALLED','HISTORYST',3);
+        $stalledDelivery=Delivery::create(['voucher_id'=>$stalled->id,'kind'=>'Meta','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'PENDING']);
+        $stalledDelivery->update(['updated_at'=>now()->subMinutes(31)]);
         $expired=$makeVoucher('VS-HISTORY-EXPIRED','HISTORYEX',366);
 
-        $this->actingAs($admin)->get('/admin/riwayat-voucher')->assertOk()->assertSee($active->code)->assertSee($used->code)->assertSee($expired->code)->assertSee('Pengiriman perlu diperiksa');
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('Pengiriman perlu diperiksa')->assertSee('>3</a>',false)->assertSee(route('admin.voucher-history',['lifecycle'=>'PERLU_DIPERIKSA']),false);
+        $this->actingAs($admin)->get('/admin/riwayat-voucher')->assertOk()->assertSee($active->code)->assertSee($used->code)->assertSee($expired->code)->assertSee('>Dari</span>',false)->assertSee('>Sampai</span>',false)->assertSee(route('admin.order',$used->order->reference).'#pengiriman',false);
+        $this->actingAs($admin)->get(route('admin.order',$used->order->reference))->assertOk()->assertSee('id="pengiriman"',false);
+        $this->actingAs($admin)->get(route('admin.order',$active->order->reference))->assertOk()->assertSee(route('admin.voucher',['code'=>$active->code]),false);
         $this->actingAs($admin)->get('/admin/riwayat-voucher?lifecycle=TERPAKAI')->assertOk()->assertSee($used->code)->assertDontSee($active->code)->assertDontSee($expired->code);
         $this->actingAs($admin)->get('/admin/riwayat-voucher?lifecycle=KEDALUWARSA')->assertOk()->assertSee($expired->code)->assertDontSee($active->code)->assertDontSee($used->code);
+        $this->actingAs($admin)->get('/admin/riwayat-voucher?lifecycle=PERLU_DIPERIKSA')->assertOk()->assertSee($active->code)->assertSee($used->code)->assertSee($stalled->code)->assertDontSee($expired->code);
+        $this->actingAs($admin);
+        \Livewire\Livewire::test(\App\Livewire\Orders::class)
+            ->set('status','MENUNGGU_VERIFIKASI')
+            ->set('search',$active->order->reference)
+            ->assertSet('status','')
+            ->assertSee($active->order->reference);
+
+        config(['voucher.waco.ready'=>false]);
+        $active->update(['owner_name'=>'Customer Fixture','phone'=>'+6281200000001']);
+        Delivery::create(['voucher_id'=>$active->id,'kind'=>'WhatsApp','event_id'=>fake()->uuid(),'revision'=>1,'status'=>'PENDING']);
+        $this->actingAs($admin)->post(route('admin.mark-manual-delivery',$active),['send_confirmed'=>true])->assertRedirect(route('admin.voucher',['code'=>$active->code]));
+        $this->actingAs($admin)->get(route('admin.order',$active->order->reference))->assertOk()->assertSee('Dikirim manual');
     }
 
     public function test_landing_can_be_read_repeatedly_from_the_database_cache(): void

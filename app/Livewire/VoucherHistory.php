@@ -36,7 +36,7 @@ class VoucherHistory extends Component
     {
         abort_unless(auth()->user()?->active,403);
         $this->validate([
-            'search'=>'string|max:150', 'lifecycle'=>'in:,AKTIF,TERPAKAI,KEDALUWARSA',
+            'search'=>'string|max:150', 'lifecycle'=>'in:,AKTIF,TERPAKAI,KEDALUWARSA,PERLU_DIPERIKSA',
             'paidFrom'=>'nullable|date_format:Y-m-d|before_or_equal:paidTo',
             'paidTo'=>'nullable|date_format:Y-m-d|after_or_equal:paidFrom',
         ]);
@@ -47,7 +47,7 @@ class VoucherHistory extends Component
             ->join('payment_orders','payment_orders.id','=','vouchers.payment_order_id')
             ->join('voucher_policies','voucher_policies.id','=','payment_orders.policy_id')
             ->with(['order.policy','redemption.branch','redemption.actor'])
-            ->withCount(['deliveries as delivery_attention_count'=>fn($q)=>$q->whereIn('status',['FAILED','UNCERTAIN'])]);
+            ->withCount(['deliveries as delivery_attention_count'=>fn($q)=>$q->needsAttention()]);
 
         if ($this->search!=='') {
             $term=trim($this->search);
@@ -65,6 +65,7 @@ class VoucherHistory extends Component
             'TERPAKAI'=>$query->where('vouchers.status','TERPAKAI'),
             'AKTIF'=>$query->where('vouchers.status','AKTIF')->whereRaw("$expiresOn >= ?",[$today]),
             'KEDALUWARSA'=>$query->where('vouchers.status','AKTIF')->whereRaw("$expiresOn < ?",[$today]),
+            'PERLU_DIPERIKSA'=>$query->whereHas('deliveries',fn($q)=>$q->needsAttention()),
             default=>null,
         };
 

@@ -13,7 +13,11 @@ class Orders extends Component
     use WithPagination;
     #[Url] public string $search='';
     #[Url] public string $status='MENUNGGU_VERIFIKASI';
-    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        if ($this->search!=='') { $this->status=''; }
+        $this->resetPage();
+    }
     public function updatedStatus(): void { $this->resetPage(); }
     public function resetFilters(): void { $this->search=''; $this->status=''; $this->resetPage(); }
     public function export(): void

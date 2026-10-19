@@ -13,6 +13,7 @@ class AdminAccessTest extends TestCase
     {
         $this->get('/admin')->assertRedirect('/admin/login');
         $this->post('/admin/vouchers/1/resend')->assertRedirect('/admin/login');
+        $this->post('/admin/vouchers/1/manual-delivery')->assertRedirect('/admin/login');
         $this->post('/admin/deliveries/1/retry')->assertRedirect('/admin/login');
     }
 
@@ -22,6 +23,7 @@ class AdminAccessTest extends TestCase
         $this->actingAs($user)->get('/admin')->assertForbidden();
         $this->actingAs($user)->get('/admin/pesanan')->assertForbidden();
         $this->actingAs($user)->post('/admin/vouchers/1/resend')->assertForbidden();
+        $this->actingAs($user)->post('/admin/vouchers/1/manual-delivery')->assertForbidden();
         $this->actingAs($user)->post('/admin/deliveries/1/retry')->assertForbidden();
         $this->actingAs($user)->get('/admin/pesanan/UNKNOWN')->assertForbidden();
     }

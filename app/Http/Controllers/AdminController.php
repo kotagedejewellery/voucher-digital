@@ -13,7 +13,7 @@ class AdminController extends Controller
             'counts'=>PaymentOrder::selectRaw("count(*) as checkout, count(*) filter (where status = 'MENUNGGU_VERIFIKASI') as pending, count(*) filter (where status = 'PAID') as paid, coalesce(sum(price) filter (where status = 'PAID'),0) as revenue")->first(),
             'claims'=>Redemption::count(),'viewed'=>Voucher::whereNotNull('viewed_at')->count(),'scanned'=>Voucher::whereNotNull('scanned_at')->count(),
             'qris'=>QrisAsset::find(Setting::read('qris_id')),'branches'=>Branch::where('active',true)->count(),
-            'failed'=>Delivery::where('status','FAILED')->count(),
+            'deliveryAttention'=>Delivery::needsAttention()->count(),
         ]);
     }
     public function order(Request $request,PaymentOrder $order)
@@ -30,7 +30,7 @@ class AdminController extends Controller
     {
         $data=$request->validate([
             'code'=>'required|string|max:300', 'from_history'=>'nullable|boolean',
-            'history_search'=>'nullable|string|max:150', 'history_lifecycle'=>'nullable|in:,AKTIF,TERPAKAI,KEDALUWARSA',
+            'history_search'=>'nullable|string|max:150', 'history_lifecycle'=>'nullable|in:,AKTIF,TERPAKAI,KEDALUWARSA,PERLU_DIPERIKSA',
             'history_paid_from'=>'nullable|date_format:Y-m-d|before_or_equal:history_paid_to',
             'history_paid_to'=>'nullable|date_format:Y-m-d|after_or_equal:history_paid_from',
         ]);
@@ -38,7 +38,7 @@ class AdminController extends Controller
         if (preg_match('/^[a-f0-9]{64}$/D',$input)) { $hash=hash('sha256',$input); }
         elseif (preg_match('~/v/([a-f0-9]{64})$~D',$input,$match)) { $hash=hash('sha256',$match[1]); }
         else { $code=strtoupper($input); }
-        $voucher=Voucher::with(['order.policy','redemption.branch','redemption.actor','transfer'])->when(isset($hash),fn($q)=>$q->where('token_hash',$hash),fn($q)=>$q->where('code',$code??''))->first();
+        $voucher=Voucher::with(['order.policy','redemption.branch','redemption.actor','transfer','deliveries'])->when(isset($hash),fn($q)=>$q->where('token_hash',$hash),fn($q)=>$q->where('code',$code??''))->first();
         if (!$voucher) { return redirect()->route('admin.orders')->withErrors(['code'=>'Kode atau link voucher tidak ditemukan. Periksa kembali.'])->withInput(); }
         if (!$voucher->scanned_at) { $voucher->update(['scanned_at'=>now()]); }
         $quote=$voucher->quote();
