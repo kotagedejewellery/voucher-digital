@@ -154,6 +154,17 @@ window.addEventListener('pageshow', event => {
     }
 });
 document.addEventListener('click', async event => {
+    const togglePassword = event.target.closest('[data-toggle-password]');
+    if (togglePassword) {
+        const field = document.getElementById(togglePassword.getAttribute('aria-controls'));
+        if (!field) return;
+        const visible = field.type === 'text';
+        field.type = visible ? 'password' : 'text';
+        togglePassword.setAttribute('aria-pressed', String(!visible));
+        togglePassword.textContent = visible ? 'Tampilkan' : 'Sembunyikan';
+        togglePassword.setAttribute('aria-label', visible ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
+        return;
+    }
     const close = event.target.closest('[data-dismiss-feedback]');
     if (close) { close.closest('.feedback-toast').hidden = true; return; }
     const copy = event.target.closest('[data-copy]');

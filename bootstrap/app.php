@@ -23,4 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        $exceptions->render(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $exception, Request $request) {
+            if ($request->expectsJson() || !$request->is('admin/login')) return null;
+            $response=app(\App\Http\Controllers\AuthController::class)->throttled($request, (int)($exception->getHeaders()['Retry-After'] ?? 60));
+            $response->headers->add($exception->getHeaders());
+            return $response;
+        });
     })->create();

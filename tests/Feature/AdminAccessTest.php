@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\Setting;
 use App\Models\User;
 
 class AdminAccessTest extends TestCase
@@ -30,9 +31,22 @@ class AdminAccessTest extends TestCase
 
     public function test_login_is_rate_limited_and_registration_is_absent(): void
     {
+        $this->withoutVite();
         for ($i=0;$i<6;$i++) { $this->postJson('/admin/login',['email'=>'unknown@example.test','password'=>'wrong'])->assertUnprocessable(); }
-        $this->postJson('/admin/login',['email'=>'unknown@example.test','password'=>'wrong'])->assertTooManyRequests();
+        $this->post('/admin/login',['email'=>'unknown@example.test','password'=>'wrong'])->assertTooManyRequests()
+            ->assertSee('Terlalu banyak percobaan masuk.')
+            ->assertSee('detik sebelum mencoba kembali.');
         $this->get('/register')->assertNotFound();
+    }
+
+    public function test_login_shows_configured_support_and_access_controls(): void
+    {
+        Setting::put('support_phone','+6281200000101');
+        $this->withoutVite();
+        $this->get('/admin/login')->assertOk()
+            ->assertSee('Akses privat Admin/CS')
+            ->assertSee('Hubungi pengelola via WhatsApp')
+            ->assertSee('data-toggle-password',false);
     }
 
     public function test_logout_ends_the_session_and_returns_feedback(): void

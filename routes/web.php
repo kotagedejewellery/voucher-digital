@@ -19,7 +19,7 @@ Route::get('/qris/{asset}', [CheckoutController::class,'qris'])->whereNumber('as
 Route::get('/v/{token}', [VoucherController::class,'show'])->middleware('throttle:90,1')->name('voucher.show');
 
 Route::middleware('guest')->group(function () {
-    Route::view('/admin/login', 'auth.login')->name('login');
+    Route::get('/admin/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/admin/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 });
 Route::middleware(['auth', 'active'])->prefix('admin')->group(function () {

@@ -14,8 +14,11 @@ observe(admin);
 const login = async (page, base, inspectLogin = false) => {
   const response = await page.goto(base + '/admin/login'); assert.equal(response.status(), 200);
   if (inspectLogin) await capture(page, 'login');
-  await page.locator('#email').fill(credentials.email); await page.locator('#password').fill(credentials.password);
-  await Promise.all([page.waitForURL(base + '/admin'), page.getByRole('button', { name: 'Masuk', exact: true }).click()]);
+  const password=page.locator('#password');
+  await page.getByRole('button',{name:'Tampilkan kata sandi'}).click(); assert.equal(await password.getAttribute('type'),'text');
+  await page.getByRole('button',{name:'Sembunyikan kata sandi'}).click(); assert.equal(await password.getAttribute('type'),'password');
+  await page.locator('#email').fill(credentials.email); await password.fill(credentials.password);
+  await Promise.all([page.waitForURL(base + '/admin'), page.getByRole('button', { name: 'Buka panel voucher', exact: true }).click()]);
 };
 const capture = async (page, name, widths = [320, 390, 768, 1024, 1440, 1920]) => {
   for (const width of widths) {
